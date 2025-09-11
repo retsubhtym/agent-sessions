@@ -1,0 +1,3 @@
+{"timestamp":"2025-09-10T10:00:00Z","role":"user","content":"What's the weather like in SF today?","model":"o4-mini"}
+{"timestamp":"2025-09-10T10:00:05Z","role":"assistant","content":"It looks sunny with a high of 72°F."}
+

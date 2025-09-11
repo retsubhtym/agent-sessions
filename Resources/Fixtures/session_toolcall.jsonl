@@ -1,0 +1,5 @@
+{"timestamp":"2025-09-10T12:00:00Z","role":"user","content":"Translate 'hello' to Spanish","model":"gpt-4o-mini"}
+{"timestamp":"2025-09-10T12:00:01Z","type":"tool_call","function":{"name":"translate"},"arguments":"{\"text\":\"hello\",\"to\":\"es\"}"}
+{"timestamp":"2025-09-10T12:00:01Z","type":"tool_result","name":"translate","result":"hola"}
+{"timestamp":"2025-09-10T12:00:02Z","role":"assistant","content":"\"hola\""}
+

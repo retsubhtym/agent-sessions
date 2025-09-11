@@ -1,0 +1,280 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B000001C2A0A000100000001 /* CodexHistoryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000112A0A000100000001 /* CodexHistoryApp.swift */; };
+		B000001C2A0A000100000002 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000113A0A000100000001 /* Session.swift */; };
+		B000001C2A0A000100000003 /* SessionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000114A0A000100000001 /* SessionEvent.swift */; };
+		B000001C2A0A000100000004 /* SessionIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000115A0A000100000001 /* SessionIndexer.swift */; };
+		B000001C2A0A000100000005 /* SessionsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000116A0A000100000001 /* SessionsListView.swift */; };
+		B000001C2A0A000100000006 /* SessionTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000117A0A000100000001 /* SessionTimelineView.swift */; };
+		B000001C2A0A000100000007 /* EventInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000118A0A000100000001 /* EventInspectorView.swift */; };
+		B000001C2A0A000100000008 /* SearchFiltersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000119A0A000100000001 /* SearchFiltersView.swift */; };
+		B000001C2A0A000100000009 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000011AA0A000100000001 /* PreferencesView.swift */; };
+		B000001C2A0A00010000000A /* JSONLReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000011BA0A000100000001 /* JSONLReader.swift */; };
+		B000001C2A0A00010000000B /* PrettyJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000011CA0A000100000001 /* PrettyJSON.swift */; };
+		B000001C2A0A00010000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0000011DA0A000100000001 /* Assets.xcassets */; };
+		B000001C2A0A00010000000D /* SessionParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000011FA0A000100000001 /* SessionParserTests.swift */; };
+		B000001C2A0A00010000000E /* session_simple.jsonl in Resources */ = {isa = PBXBuildFile; fileRef = B00000121A0A000100000001 /* session_simple.jsonl */; };
+		B000001C2A0A00010000000F /* session_toolcall.jsonl in Resources */ = {isa = PBXBuildFile; fileRef = B00000122A0A000100000001 /* session_toolcall.jsonl */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B000001C2A0A000100000010 /* PBXContainerItemProxy */ = {
+            isa = PBXContainerItemProxy;
+            containerPortal = B00000101A0A000100000001 /* Project object */;
+            proxyType = 1;
+            remoteGlobalIDString = B0000010CA0A000100000001;
+            remoteInfo = CodexHistory;
+        };
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		B0000010DA0A000100000001 /* CodexHistory.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CodexHistory.app; sourceTree = BUILT_PRODUCTS_DIR; };
+        B00000110A0A000100000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+        B00000111A0A000100000001 /* CodexHistoryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexHistoryApp.swift; sourceTree = "<group>"; };
+        B00000112A0A000100000001 /* CodexHistoryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CodexHistoryApp.swift; path = CodexHistory/CodexHistoryApp.swift; sourceTree = SOURCE_ROOT; };
+        B00000113A0A000100000001 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Session.swift; path = CodexHistory/Model/Session.swift; sourceTree = SOURCE_ROOT; };
+        B00000114A0A000100000001 /* SessionEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionEvent.swift; path = CodexHistory/Model/SessionEvent.swift; sourceTree = SOURCE_ROOT; };
+        B00000115A0A000100000001 /* SessionIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionIndexer.swift; path = CodexHistory/Services/SessionIndexer.swift; sourceTree = SOURCE_ROOT; };
+        B00000116A0A000100000001 /* SessionsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionsListView.swift; path = CodexHistory/Views/SessionsListView.swift; sourceTree = SOURCE_ROOT; };
+        B00000117A0A000100000001 /* SessionTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionTimelineView.swift; path = CodexHistory/Views/SessionTimelineView.swift; sourceTree = SOURCE_ROOT; };
+        B00000118A0A000100000001 /* EventInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EventInspectorView.swift; path = CodexHistory/Views/EventInspectorView.swift; sourceTree = SOURCE_ROOT; };
+        B00000119A0A000100000001 /* SearchFiltersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SearchFiltersView.swift; path = CodexHistory/Views/SearchFiltersView.swift; sourceTree = SOURCE_ROOT; };
+        B0000011AA0A000100000001 /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PreferencesView.swift; path = CodexHistory/Views/PreferencesView.swift; sourceTree = SOURCE_ROOT; };
+        B0000011BA0A000100000001 /* JSONLReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = JSONLReader.swift; path = CodexHistory/Utilities/JSONLReader.swift; sourceTree = SOURCE_ROOT; };
+        B0000011CA0A000100000001 /* PrettyJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PrettyJSON.swift; path = CodexHistory/Utilities/PrettyJSON.swift; sourceTree = SOURCE_ROOT; };
+        B0000011DA0A000100000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = CodexHistory/Assets.xcassets; sourceTree = SOURCE_ROOT; };
+        B0000011EA0A000100000001 /* CodexHistoryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CodexHistoryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+        B0000011FA0A000100000001 /* SessionParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionParserTests.swift; path = CodexHistoryTests/SessionParserTests.swift; sourceTree = SOURCE_ROOT; };
+        B00000120A0A000100000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = CodexHistoryTests/Info.plist; sourceTree = SOURCE_ROOT; };
+        B00000121A0A000100000001 /* session_simple.jsonl */ = {isa = PBXFileReference; lastKnownFileType = text; name = session_simple.jsonl; path = Resources/Fixtures/session_simple.jsonl; sourceTree = SOURCE_ROOT; };
+        B00000122A0A000100000001 /* session_toolcall.jsonl */ = {isa = PBXFileReference; lastKnownFileType = text; name = session_toolcall.jsonl; path = Resources/Fixtures/session_toolcall.jsonl; sourceTree = SOURCE_ROOT; };
+        B00000123A0A000100000001 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+        B00000124A0A000100000001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; };
+        B00000125A0A000100000001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+        B00000102A0A000100000001 = {
+            isa = PBXGroup;
+            children = (
+                B00000126A0A000100000001 /* CodexHistory */,
+                B00000127A0A000100000001 /* CodexHistoryTests */,
+                B00000128A0A000100000001 /* Resources */,
+                B00000123A0A000100000001 /* README.md */,
+                B00000129A0A000100000001 /* .github */,
+                B0000010EA0A000100000001 /* Products */
+            );
+            sourceTree = "<group>";
+        };
+        B0000010EA0A000100000001 /* Products */ = {isa = PBXGroup; children = (B0000010DA0A000100000001 /* CodexHistory.app */, B0000011EA0A000100000001 /* CodexHistoryTests.xctest */); name = Products; sourceTree = "<group>"; };
+        B00000126A0A000100000001 /* CodexHistory */ = {
+            isa = PBXGroup;
+            children = (
+                B00000110A0A000100000001 /* Info.plist */,
+                B0000011DA0A000100000001 /* Assets.xcassets */,
+                B0000012AA0A000100000001 /* Model */,
+                B0000012BA0A000100000001 /* Services */,
+                B0000012CA0A000100000001 /* Utilities */,
+                B0000012DA0A000100000001 /* Views */,
+                B00000112A0A000100000001 /* CodexHistoryApp.swift */
+            );
+            path = CodexHistory;
+            sourceTree = SOURCE_ROOT;
+        };
+        B00000127A0A000100000001 /* CodexHistoryTests */ = {isa = PBXGroup; children = (B00000120A0A000100000001 /* Info.plist */, B0000011FA0A000100000001 /* SessionParserTests.swift */); path = CodexHistoryTests; sourceTree = SOURCE_ROOT; };
+        B00000128A0A000100000001 /* Resources */ = {isa = PBXGroup; children = (B0000012EA0A000100000001 /* Fixtures */); path = Resources; sourceTree = SOURCE_ROOT; };
+        B00000129A0A000100000001 /* .github */ = {isa = PBXGroup; path = .github; sourceTree = SOURCE_ROOT; children = ( ); };
+        B0000012EA0A000100000001 /* Fixtures */ = {isa = PBXGroup; children = (B00000121A0A000100000001 /* session_simple.jsonl */, B00000122A0A000100000001 /* session_toolcall.jsonl */); path = Fixtures; sourceTree = "<group>"; };
+        B0000012AA0A000100000001 /* Model */ = {isa = PBXGroup; children = (B00000113A0A000100000001 /* Session.swift */, B00000114A0A000100000001 /* SessionEvent.swift */); path = Model; sourceTree = "<group>"; };
+        B0000012BA0A000100000001 /* Services */ = {isa = PBXGroup; children = (B00000115A0A000100000001 /* SessionIndexer.swift */); path = Services; sourceTree = "<group>"; };
+        B0000012CA0A000100000001 /* Utilities */ = {isa = PBXGroup; children = (B0000011BA0A000100000001 /* JSONLReader.swift */, B0000011CA0A000100000001 /* PrettyJSON.swift */); path = Utilities; sourceTree = "<group>"; };
+        B0000012DA0A000100000001 /* Views */ = {isa = PBXGroup; children = (B00000116A0A000100000001 /* SessionsListView.swift */, B00000117A0A000100000001 /* SessionTimelineView.swift */, B00000118A0A000100000001 /* EventInspectorView.swift */, B00000119A0A000100000001 /* SearchFiltersView.swift */, B0000011AA0A000100000001 /* PreferencesView.swift */); path = Views; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+        B0000010CA0A000100000001 /* CodexHistory */ = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = B0000013BA0A000100000001 /* Build configuration list for PBXNativeTarget "CodexHistory" */;
+            buildPhases = (
+                B00000130A0A000100000001 /* Sources */, 
+                B00000124A0A000100000001 /* Frameworks */, 
+                B00000131A0A000100000001 /* Resources */
+            );
+            buildRules = ();
+            dependencies = ();
+            name = CodexHistory;
+            productName = CodexHistory;
+            productReference = B0000010DA0A000100000001 /* CodexHistory.app */;
+            productType = "com.apple.product-type.application";
+        };
+        B0000010FA0A000100000001 /* CodexHistoryTests */ = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = B0000013CA0A000100000001 /* Build configuration list for PBXNativeTarget "CodexHistoryTests" */;
+            buildPhases = (
+                B00000132A0A000100000001 /* Sources */, 
+                B00000125A0A000100000001 /* Frameworks */, 
+                B00000133A0A000100000001 /* Resources */
+            );
+            buildRules = ();
+            dependencies = (
+                B00000134A0A000100000001 /* PBXTargetDependency */
+            );
+            name = CodexHistoryTests;
+            productName = CodexHistoryTests;
+            productReference = B0000011EA0A000100000001 /* CodexHistoryTests.xctest */;
+            productType = "com.apple.product-type.bundle.unit-test";
+        };
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+        B00000101A0A000100000001 /* Project object */ = {
+            isa = PBXProject;
+            attributes = {
+                BuildIndependentTargetsInParallel = YES;
+                LastSwiftUpdateCheck = 1500;
+                LastUpgradeCheck = 1500;
+                TargetAttributes = {
+                    B0000010CA0A000100000001 = {CreatedOnToolsVersion = 15.0; };
+                    B0000010FA0A000100000001 = {CreatedOnToolsVersion = 15.0; };
+                };
+            };
+            buildConfigurationList = B00000135A0A000100000001 /* Build configuration list for PBXProject "CodexHistory" */;
+            compatibilityVersion = "Xcode 15.0";
+            developmentRegion = en;
+            hasScannedForEncodings = 0;
+            knownRegions = (en, Base);
+            mainGroup = B00000102A0A000100000001;
+            productRefGroup = B0000010EA0A000100000001 /* Products */;
+            projectDirPath = "";
+            projectRoot = "";
+            targets = (B0000010CA0A000100000001 /* CodexHistory */, B0000010FA0A000100000001 /* CodexHistoryTests */);
+        };
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+        B00000131A0A000100000001 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B000001C2A0A00010000000C /* Assets.xcassets in Resources */); runOnlyForDeploymentPostprocessing = 0; };
+        B00000133A0A000100000001 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B000001C2A0A00010000000E /* session_simple.jsonl in Resources */, B000001C2A0A00010000000F /* session_toolcall.jsonl in Resources */); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+        B00000130A0A000100000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
+                B000001C2A0A000100000001 /* CodexHistoryApp.swift in Sources */, 
+                B000001C2A0A000100000002 /* Session.swift in Sources */, 
+                B000001C2A0A000100000003 /* SessionEvent.swift in Sources */, 
+                B000001C2A0A000100000004 /* SessionIndexer.swift in Sources */, 
+                B000001C2A0A000100000005 /* SessionsListView.swift in Sources */, 
+                B000001C2A0A000100000006 /* SessionTimelineView.swift in Sources */, 
+                B000001C2A0A000100000007 /* EventInspectorView.swift in Sources */, 
+                B000001C2A0A000100000008 /* SearchFiltersView.swift in Sources */, 
+                B000001C2A0A000100000009 /* PreferencesView.swift in Sources */, 
+                B000001C2A0A00010000000A /* JSONLReader.swift in Sources */, 
+                B000001C2A0A00010000000B /* PrettyJSON.swift in Sources */
+            ); runOnlyForDeploymentPostprocessing = 0; };
+        B00000132A0A000100000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B000001C2A0A00010000000D /* SessionParserTests.swift in Sources */); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+        B00000134A0A000100000001 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = B0000010CA0A000100000001 /* CodexHistory */; targetProxy = B000001C2A0A000100000010 /* PBXContainerItemProxy */; };
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+        B00000136A0A000100000001 /* Debug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                CLANG_ENABLE_MODULES = YES;
+                CODE_SIGNING_ALLOWED = YES;
+                CODE_SIGN_STYLE = Automatic;
+                CURRENT_PROJECT_VERSION = 1;
+                GENERATE_INFOPLIST_FILE = YES;
+                INFOPLIST_KEY_NSHumanReadableCopyright = "© 2025 CodexHistory";
+                INFOPLIST_KEY_NSMainStoryboardFile = "";
+                INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+                LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
+                MACOSX_DEPLOYMENT_TARGET = 14.0;
+                MARKETING_VERSION = 0.1.0;
+                PRODUCT_BUNDLE_IDENTIFIER = com.triada.CodexHistory;
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SDKROOT = macosx;
+                SUPPORTED_PLATFORMS = "macosx";
+                SWIFT_EMIT_LOC_STRINGS = YES;
+                SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+                SWIFT_VERSION = 5.9;
+                TARGETED_DEVICE_FAMILY = 6;
+                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+            };
+            name = Debug;
+        };
+        B00000137A0A000100000001 /* Release */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                CLANG_ENABLE_MODULES = YES;
+                CODE_SIGNING_ALLOWED = YES;
+                CODE_SIGN_STYLE = Automatic;
+                CURRENT_PROJECT_VERSION = 1;
+                GENERATE_INFOPLIST_FILE = YES;
+                INFOPLIST_KEY_NSHumanReadableCopyright = "© 2025 CodexHistory";
+                INFOPLIST_KEY_NSMainStoryboardFile = "";
+                INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+                LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
+                MACOSX_DEPLOYMENT_TARGET = 14.0;
+                MARKETING_VERSION = 0.1.0;
+                PRODUCT_BUNDLE_IDENTIFIER = com.triada.CodexHistory;
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SDKROOT = macosx;
+                SUPPORTED_PLATFORMS = "macosx";
+                SWIFT_EMIT_LOC_STRINGS = YES;
+                SWIFT_VERSION = 5.9;
+                TARGETED_DEVICE_FAMILY = 6;
+                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+            };
+            name = Release;
+        };
+        B00000138A0A000100000001 /* Debug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ALWAYS_SEARCH_USER_PATHS = NO;
+                CLANG_ENABLE_OBJC_ARC = YES;
+                CODE_SIGNING_ALLOWED = NO;
+                ENABLE_TESTABILITY = YES;
+                MACOSX_DEPLOYMENT_TARGET = 14.0;
+                PRODUCT_BUNDLE_IDENTIFIER = com.triada.CodexHistoryTests;
+                SDKROOT = macosx;
+                SWIFT_VERSION = 5.9;
+                GENERATE_INFOPLIST_FILE = YES;
+            };
+            name = Debug;
+        };
+        B00000139A0A000100000001 /* Release */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ALWAYS_SEARCH_USER_PATHS = NO;
+                CLANG_ENABLE_OBJC_ARC = YES;
+                CODE_SIGNING_ALLOWED = NO;
+                MACOSX_DEPLOYMENT_TARGET = 14.0;
+                PRODUCT_BUNDLE_IDENTIFIER = com.triada.CodexHistoryTests;
+                SDKROOT = macosx;
+                SWIFT_VERSION = 5.9;
+                GENERATE_INFOPLIST_FILE = YES;
+            };
+            name = Release;
+        };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+        B00000135A0A000100000001 /* Build configuration list for PBXProject "CodexHistory" */ = {isa = XCConfigurationList; buildConfigurations = (B00000136A0A000100000001, B00000137A0A000100000001); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+        B0000013BA0A000100000001 /* Build configuration list for PBXNativeTarget "CodexHistory" */ = {isa = XCConfigurationList; buildConfigurations = (B00000136A0A000100000001, B00000137A0A000100000001); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+        B0000013CA0A000100000001 /* Build configuration list for PBXNativeTarget "CodexHistoryTests" */ = {isa = XCConfigurationList; buildConfigurations = (B00000138A0A000100000001, B00000139A0A000100000001); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+
+    };
+    rootObject = B00000101A0A000100000001 /* Project object */;
+}
