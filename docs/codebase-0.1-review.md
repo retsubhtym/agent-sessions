@@ -43,7 +43,7 @@ Sessions directory
 - `Views/`
   - `SessionsListView`: Sortable sessions list with metadata columns and Finder/ID context actions.
   - `TranscriptPlainView`: Read‑only monospaced transcript viewer with in‑view find, copy, and a Raw/Pretty sheet.
-  - `SearchFiltersView`: Search bar, model menu, date range toggles/pickers, and kind toggles.
+  - `SearchFiltersView`: Search bar only.
   - `PreferencesView`: Sessions root override + appearance (theme) selection.
   - Additional (not wired in split view by default): `SessionTimelineView`, `EventInspectorView`.
 - `CodexHistoryApp.swift`: App entry and window/commands; first‑run prompt if default folder is not readable.
@@ -76,9 +76,9 @@ Sessions directory
 
 ## Search and Filters
 
-- `Filters`: query, date range (`from`/`to`), model, and selected kinds (set of `SessionEventKind`).
+- `Filters`: query and selected kinds (set of `SessionEventKind`), with kind selection moved to Preferences; default includes all kinds.
 - `FilterEngine`:
-  - Date range applies against `endTime` or `startTime` fallback.
+  - Date/model filtering removed in current UI to reduce clutter; kind filtering is available in Preferences.
   - Full‑text matches across `text`, `toolInput`, `toolOutput`, and raw JSON (case‑insensitive substring).
   - Sorts sessions by start time descending.
 - Combine pipeline debounces query and reacts to filters and `allSessions` changes to produce `sessions` for the UI.
@@ -87,7 +87,7 @@ Sessions directory
 
 - Split view: Sidebar sessions list + transcript detail.
 - Toolbar: Search/filters, refresh, sidebar toggle, preferences.
-- Keyboard commands: Refresh (Cmd‑R), Copy Transcript (Cmd‑C), Find in Transcript (Cmd‑F).
+- Keyboard commands: Refresh (Cmd‑R), Copy Transcript (Cmd‑Shift‑C), Find in Transcript (Cmd‑F). Default Copy (Cmd‑C) now copies only the selected text in the transcript view.
 - First run: Prompts for a sessions directory if default isn’t accessible; also configurable under Preferences.
 - Detail view: In‑view find with match count and navigation; optional Raw/Pretty whole‑session sheet for inspection.
 
@@ -123,7 +123,7 @@ Potential future improvements:
 
 Recommendations:
 - Expand test fixtures to include edge cases (missing timestamps, nested tool outputs, mixed newline encodings, extremely large files).
-- Add tests for `gitBranch` extraction regexes and date range filtering around boundaries/timezones.
+- Add tests for `gitBranch` extraction regexes.
 
 ## Lint and Style
 
@@ -172,4 +172,3 @@ Notes:
 ---
 
 Overall, the codebase is thoughtfully organized and pragmatic for the goal of fast, read‑only exploration of Codex session logs. With a few targeted enhancements around live updates, export options, and lint/UX polish, it’s well positioned for a 0.2 release.
-

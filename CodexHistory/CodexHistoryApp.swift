@@ -30,7 +30,7 @@ struct CodexHistoryApp: App {
                 Button("Refresh") { indexer.refresh() }
                     .keyboardShortcut("r", modifiers: .command)
                 Button("Copy Transcript") { indexer.requestCopyPlain.toggle() }
-                    .keyboardShortcut("c", modifiers: .command)
+                    .keyboardShortcut("c", modifiers: [.command, .shift])
                 Button("Find in Transcript") { indexer.requestTranscriptFindFocus.toggle() }
                     .keyboardShortcut("f", modifiers: .command)
             }

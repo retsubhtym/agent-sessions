@@ -31,6 +31,8 @@ final class SessionIndexer: ObservableObject {
     // Preferences
     @AppStorage("SessionsRootOverride") var sessionsRootOverride: String = ""
     @AppStorage("TranscriptTheme") private var themeRaw: String = TranscriptTheme.codexDark.rawValue
+    @AppStorage("HideZeroMessageSessions") var hideZeroMessageSessionsPref: Bool = true
+    @AppStorage("SelectedKindsRaw") private var selectedKindsRaw: String = ""
 
     var prefTheme: TranscriptTheme { TranscriptTheme(rawValue: themeRaw) ?? .codexDark }
     func setTheme(_ t: TranscriptTheme) { themeRaw = t.rawValue }
@@ -53,13 +55,33 @@ final class SessionIndexer: ObservableObject {
             $allSessions
         )
             .receive(on: DispatchQueue.global(qos: .userInitiated))
-            .map { input, kinds, all -> [Session] in
+            .map { [weak self] input, kinds, all -> [Session] in
                 let (q, from, to, model) = input
                 let filters = Filters(query: q, dateFrom: from, dateTo: to, model: model, kinds: kinds)
-                return FilterEngine.filterSessions(all, filters: filters)
+                var results = FilterEngine.filterSessions(all, filters: filters)
+                if self?.hideZeroMessageSessionsPref ?? true {
+                    results = results.filter { $0.nonMetaCount > 0 }
+                }
+                return results
             }
             .receive(on: DispatchQueue.main)
             .assign(to: &$sessions)
+
+        // Load persisted selected kinds on startup
+        if !selectedKindsRaw.isEmpty {
+            let kinds = selectedKindsRaw.split(separator: ",").compactMap { SessionEventKind(rawValue: String($0)) }
+            if !kinds.isEmpty { selectedKinds = Set(kinds) }
+        }
+
+        // Persist selected kinds whenever they change (empty string means all kinds)
+        $selectedKinds
+            .map { kinds -> String in
+                if kinds.count == SessionEventKind.allCases.count { return "" }
+                return kinds.map { $0.rawValue }.sorted().joined(separator: ",")
+            }
+            .removeDuplicates()
+            .sink { [weak self] raw in self?.selectedKindsRaw = raw }
+            .store(in: &cancellables)
     }
 
     var modelsSeen: [String] {

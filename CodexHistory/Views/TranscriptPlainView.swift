@@ -73,7 +73,7 @@ struct TranscriptPlainView: View {
                 .onChange(of: showMeta) { _, _ in rebuild() }
             Spacer()
             Button("Copy") { copyAll() }
-                .keyboardShortcut("c", modifiers: .command)
+                .help("Copy entire transcript")
         }
         .padding(8)
     }
