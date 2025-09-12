@@ -14,6 +14,25 @@ public struct Session: Identifiable, Equatable, Codable {
         events.first(where: { $0.kind == .user })?.text?.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    // Derived human-friendly title for the session row.
+    // Rule: first non-empty user line (trimmed and whitespace-collapsed);
+    // if none, first assistant line; else first tool call name; else "No prompt".
+    public var title: String {
+        // 1) First non-empty user line
+        if let t = events.first(where: { $0.kind == .user })?.text?.collapsedWhitespace(), !t.isEmpty {
+            return t
+        }
+        // 2) First non-empty assistant line
+        if let t = events.first(where: { $0.kind == .assistant })?.text?.collapsedWhitespace(), !t.isEmpty {
+            return t
+        }
+        // 3) First tool call name
+        if let name = events.first(where: { $0.kind == .tool_call && ($0.toolName?.isEmpty == false) })?.toolName {
+            return name
+        }
+        return "No prompt"
+    }
+
     public var nonMetaCount: Int { events.filter { $0.kind != .meta }.count }
 
     public var modifiedRelative: String {
@@ -141,6 +160,13 @@ extension ISO8601DateFormatter {
 }
 
 // MARK: - Git branch helpers
+
+private extension String {
+    func collapsedWhitespace() -> String {
+        let parts = self.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
+        return parts.joined(separator: " ")
+    }
+}
 
 private func extractBranch(fromRawJSON raw: String) -> String? {
     if let data = raw.data(using: .utf8),

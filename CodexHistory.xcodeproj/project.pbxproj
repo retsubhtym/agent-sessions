@@ -26,6 +26,7 @@
 		B000001C2A0A000100000072 /* TranscriptPlainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000175A0A000100000001 /* TranscriptPlainView.swift */; };
 		B000001C2A0A000100000073 /* session_branch.jsonl in Resources */ = {isa = PBXBuildFile; fileRef = B00000174A0A000100000001 /* session_branch.jsonl */; };
 		B000001C2A0A000100000074 /* TranscriptBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000173A0A000100000001 /* TranscriptBuilderTests.swift */; };
+		B000001C2A0A000100000078 /* SessionTitleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000179A0A000100000001 /* SessionTitleTests.swift */; };
 		B000001C2A0A000100000075 /* PreferencesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000176A0A000100000001 /* PreferencesWindowController.swift */; };
 		B000001C2A0A000100000076 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000177A0A000100000001 /* FlowLayout.swift */; };
 		B000001C2A0A000100000077 /* AppAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000178A0A000100000001 /* AppAppearance.swift */; };
@@ -67,8 +68,9 @@
         B00000170A0A000100000001 /* TranscriptTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TranscriptTheme.swift; path = CodexHistory/Services/TranscriptTheme.swift; sourceTree = SOURCE_ROOT; };
         B00000171A0A000100000001 /* SessionTranscriptBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionTranscriptBuilder.swift; path = CodexHistory/Services/SessionTranscriptBuilder.swift; sourceTree = SOURCE_ROOT; };
 		B00000175A0A000100000001 /* TranscriptPlainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TranscriptPlainView.swift; path = CodexHistory/Views/TranscriptPlainView.swift; sourceTree = SOURCE_ROOT; };
-        B00000173A0A000100000001 /* TranscriptBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TranscriptBuilderTests.swift; path = CodexHistoryTests/TranscriptBuilderTests.swift; sourceTree = SOURCE_ROOT; };
-        B00000174A0A000100000001 /* session_branch.jsonl */ = {isa = PBXFileReference; lastKnownFileType = text; name = session_branch.jsonl; path = Resources/Fixtures/session_branch.jsonl; sourceTree = SOURCE_ROOT; };
+		B00000173A0A000100000001 /* TranscriptBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TranscriptBuilderTests.swift; path = CodexHistoryTests/TranscriptBuilderTests.swift; sourceTree = SOURCE_ROOT; };
+		B00000174A0A000100000001 /* session_branch.jsonl */ = {isa = PBXFileReference; lastKnownFileType = text; name = session_branch.jsonl; path = Resources/Fixtures/session_branch.jsonl; sourceTree = SOURCE_ROOT; };
+        B00000179A0A000100000001 /* SessionTitleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionTitleTests.swift; path = CodexHistoryTests/SessionTitleTests.swift; sourceTree = SOURCE_ROOT; };
         B00000177A0A000100000001 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FlowLayout.swift; path = CodexHistory/Utilities/FlowLayout.swift; sourceTree = SOURCE_ROOT; };
         B00000178A0A000100000001 /* AppAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppAppearance.swift; path = CodexHistory/Services/AppAppearance.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -106,7 +108,7 @@
             path = CodexHistory;
             sourceTree = SOURCE_ROOT;
         };
-        B00000127A0A000100000001 /* CodexHistoryTests */ = {isa = PBXGroup; children = (B00000120A0A000100000001 /* Info.plist */, B0000011FA0A000100000001 /* SessionParserTests.swift */, B00000173A0A000100000001 /* TranscriptBuilderTests.swift */); path = CodexHistoryTests; sourceTree = SOURCE_ROOT; };
+        B00000127A0A000100000001 /* CodexHistoryTests */ = {isa = PBXGroup; children = (B00000120A0A000100000001 /* Info.plist */, B0000011FA0A000100000001 /* SessionParserTests.swift */, B00000173A0A000100000001 /* TranscriptBuilderTests.swift */, B00000179A0A000100000001 /* SessionTitleTests.swift */); path = CodexHistoryTests; sourceTree = SOURCE_ROOT; };
         B00000128A0A000100000001 /* Resources */ = {isa = PBXGroup; children = (B0000012EA0A000100000001 /* Fixtures */); path = Resources; sourceTree = SOURCE_ROOT; };
         B00000129A0A000100000001 /* .github */ = {isa = PBXGroup; path = .github; sourceTree = SOURCE_ROOT; children = ( ); };
         B0000012EA0A000100000001 /* Fixtures */ = {isa = PBXGroup; children = (B00000121A0A000100000001 /* session_simple.jsonl */, B00000122A0A000100000001 /* session_toolcall.jsonl */, B00000174A0A000100000001 /* session_branch.jsonl */); path = Fixtures; sourceTree = "<group>"; };
@@ -200,7 +202,7 @@
                 B000001C2A0A000100000076 /* FlowLayout.swift in Sources */,
                 B000001C2A0A000100000077 /* AppAppearance.swift in Sources */
             ); runOnlyForDeploymentPostprocessing = 0; };
-        B00000132A0A000100000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B000001C2A0A00010000000D /* SessionParserTests.swift in Sources */, B000001C2A0A000100000074 /* TranscriptBuilderTests.swift in Sources */); runOnlyForDeploymentPostprocessing = 0; };
+        B00000132A0A000100000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B000001C2A0A00010000000D /* SessionParserTests.swift in Sources */, B000001C2A0A000100000074 /* TranscriptBuilderTests.swift in Sources */, B000001C2A0A000100000078 /* SessionTitleTests.swift in Sources */); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */

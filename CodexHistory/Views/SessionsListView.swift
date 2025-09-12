@@ -4,7 +4,7 @@ struct SessionsListView: View {
     @EnvironmentObject var indexer: SessionIndexer
     @Binding var selection: String?
     @State private var sortAscending: Bool = false
-    enum SortKey { case modified, msgs }
+    enum SortKey { case modified, msgs, title }
     @State private var sortKey: SortKey = .modified
 
     private var sortedSessions: [Session] {
@@ -18,6 +18,10 @@ struct SessionsListView: View {
                 let ca = a.nonMetaCount
                 let cb = b.nonMetaCount
                 return sortAscending ? (ca < cb) : (ca > cb)
+            case .title:
+                let ta = a.title.lowercased()
+                let tb = b.title.lowercased()
+                return sortAscending ? (ta < tb) : (ta > tb)
             }
         }
     }
@@ -82,10 +86,21 @@ struct SessionsListView: View {
             .frame(width: 40, alignment: .trailing)
             .help("Sort by Msgs (toggle ascending/descending)")
 
-            Text("Branch")
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(.secondary)
-                .frame(width: 80, alignment: .leading)
+            Button(action: {
+                if sortKey == .title { sortAscending.toggle() } else { sortKey = .title; sortAscending = false }
+            }) {
+                HStack(spacing: 4) {
+                    Text("Title")
+                    if sortKey == .title {
+                        Image(systemName: sortAscending ? "arrowtriangle.up.fill" : "arrowtriangle.down.fill").font(.caption2)
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+            .font(.system(.caption, design: .monospaced))
+            .foregroundStyle(.secondary)
+            .frame(width: 220, alignment: .leading)
+            .help("Sort by Title (toggle ascending/descending)")
 
             Text("—")
                 .font(.system(.caption, design: .monospaced))
@@ -133,10 +148,11 @@ private struct SessionRow: View {
                 .font(.system(.body, design: .monospaced))
                 .frame(width: 40, alignment: .trailing)
 
-            Text(session.gitBranch ?? "—")
-                .font(.system(.body, design: .monospaced))
-                .foregroundStyle(.secondary)
-                .frame(width: 80, alignment: .leading)
+            Text(session.title)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .font(.system(.body, design: .default))
+                .frame(width: 220, alignment: .leading)
 
             Text("—")
                 .foregroundStyle(.secondary)
