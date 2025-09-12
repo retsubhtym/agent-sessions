@@ -42,6 +42,8 @@ public struct Session: Identifiable, Equatable, Codable {
         return r.localizedString(for: ref, relativeTo: Date())
     }
 
+    public var modifiedAt: Date { endTime ?? startTime ?? .distantPast }
+
     // Best-effort git branch detection
     public var gitBranch: String? {
         // 1) explicit metadata in any event json

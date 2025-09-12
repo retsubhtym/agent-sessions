@@ -7,6 +7,7 @@ struct PreferencesView: View {
     @State private var valid: Bool = true
     // Appearance
     @State private var appearance: AppAppearance = .system
+    @State private var modifiedDisplay: SessionIndexer.ModifiedDisplay = .relative
     @State private var localKinds: Set<SessionEventKind> = Set(SessionEventKind.allCases)
 
     var body: some View {
@@ -31,6 +32,15 @@ struct PreferencesView: View {
                     Picker("Appearance", selection: $appearance) {
                         ForEach(AppAppearance.allCases) { a in
                             Text(a.title).tag(a)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 360)
+                }
+                PrefRow(label: "Modified") {
+                    Picker("Modified Display", selection: $modifiedDisplay) {
+                        ForEach(SessionIndexer.ModifiedDisplay.allCases) { m in
+                            Text(m.title).tag(m)
                         }
                     }
                     .pickerStyle(.segmented)
@@ -68,10 +78,11 @@ struct PreferencesView: View {
 
             HStack {
                 Spacer()
-                Button("Reset to Default") { path = ""; indexer.sessionsRootOverride = ""; validate(); indexer.refresh(); appearance = .system; indexer.setAppearance(.system) }
+                Button("Reset to Default") { path = ""; indexer.sessionsRootOverride = ""; validate(); indexer.refresh(); appearance = .system; indexer.setAppearance(.system); modifiedDisplay = .relative; indexer.setModifiedDisplay(.relative) }
                 Button("Apply") {
                     indexer.sessionsRootOverride = path
                     indexer.setAppearance(appearance)
+                    indexer.setModifiedDisplay(modifiedDisplay)
                     indexer.selectedKinds = localKinds
                     indexer.refresh()
                 }
@@ -82,6 +93,7 @@ struct PreferencesView: View {
             path = indexer.sessionsRootOverride
             validate()
             appearance = indexer.appAppearance
+            modifiedDisplay = indexer.modifiedDisplay
             localKinds = indexer.selectedKinds
         }
     }
