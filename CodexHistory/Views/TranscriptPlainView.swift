@@ -17,6 +17,7 @@ struct TranscriptPlainView: View {
     // Toggles (view-scoped)
     @State private var showTimestamps: Bool = false
     @State private var showMeta: Bool = false
+    @AppStorage("TranscriptFontSize") private var transcriptFontSize: Double = 13
 
     // Raw sheet
     @State private var showRawSheet: Bool = false
@@ -27,7 +28,7 @@ struct TranscriptPlainView: View {
         VStack(spacing: 0) {
             toolbar
             Divider()
-            PlainTextScrollView(text: transcript, selection: selectedNSRange)
+            PlainTextScrollView(text: transcript, selection: selectedNSRange, fontSize: CGFloat(transcriptFontSize))
         }
         .onAppear { syncPrefs(); rebuild() }
         .onChange(of: sessionID) { _, _ in rebuild() }
@@ -76,6 +77,18 @@ struct TranscriptPlainView: View {
             Toggle("Meta", isOn: $showMeta)
                 .onChange(of: showMeta) { _, _ in rebuild() }
             Spacer()
+            HStack(spacing: 6) {
+                Button(action: { adjustFont(-1) }) {
+                    Text("−").font(.system(size: 14, weight: .bold))
+                }
+                .accessibilityLabel("Make text smaller")
+                .help("Smaller (Cmd-)")
+                Button(action: { adjustFont(1) }) {
+                    Text("+").font(.system(size: 14, weight: .bold))
+                }
+                .accessibilityLabel("Make text bigger")
+                .help("Bigger (Cmd+=)")
+            }
             Button("Copy") { copyAll() }
                 .help("Copy entire transcript")
         }
@@ -133,6 +146,7 @@ struct TranscriptPlainView: View {
 private struct PlainTextScrollView: NSViewRepresentable {
     let text: String
     let selection: NSRange?
+    let fontSize: CGFloat
 
     class Coordinator { var lastWidth: CGFloat = 0 }
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -147,7 +161,7 @@ private struct PlainTextScrollView: NSViewRepresentable {
         let textView = NSTextView(frame: NSRect(origin: .zero, size: scroll.contentSize))
         textView.isEditable = false
         textView.isSelectable = true
-        textView.font = NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+        textView.font = NSFont.monospacedSystemFont(ofSize: fontSize, weight: .regular)
         textView.textContainerInset = NSSize(width: 8, height: 8)
         textView.textContainer?.widthTracksTextView = true
         textView.isHorizontallyResizable = false
@@ -168,6 +182,9 @@ private struct PlainTextScrollView: NSViewRepresentable {
     func updateNSView(_ nsView: NSScrollView, context: Context) {
         if let tv = nsView.documentView as? NSTextView {
             if tv.string != text { tv.string = text }
+            if let font = tv.font, abs(font.pointSize - fontSize) > 0.5 {
+                tv.font = NSFont.monospacedSystemFont(ofSize: fontSize, weight: .regular)
+            }
             let width = max(1, nsView.contentSize.width)
             tv.textContainer?.containerSize = NSSize(width: width, height: CGFloat.greatestFiniteMagnitude)
             tv.setFrameSize(NSSize(width: width, height: tv.frame.size.height))
@@ -187,6 +204,9 @@ private extension TranscriptPlainView {
         guard !findMatches.isEmpty else { selectedNSRange = nil; return }
         let range = findMatches[min(currentMatchIndex, findMatches.count - 1)]
         if let nsRange = NSRange(range, in: transcript) as NSRange? { selectedNSRange = nsRange }
+    }
+    func adjustFont(_ delta: Double) {
+        transcriptFontSize = max(9, min(30, transcriptFontSize + delta))
     }
 }
 

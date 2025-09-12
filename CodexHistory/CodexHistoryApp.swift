@@ -4,6 +4,7 @@ import AppKit
 @main
 struct CodexHistoryApp: App {
     @StateObject private var indexer = SessionIndexer()
+    @AppStorage("TranscriptFontSize") private var transcriptFontSize: Double = 13
     @State private var selectedSessionID: String?
     @State private var selectedEventID: String?
     @State private var focusSearchToggle: Bool = false
@@ -34,12 +35,29 @@ struct CodexHistoryApp: App {
                 Button("Find in Transcript") { indexer.requestTranscriptFindFocus.toggle() }
                     .keyboardShortcut("f", modifiers: .command)
             }
+            CommandMenu("Text Size") {
+                Button("Make Text Bigger") { adjustFont(delta: 1) }
+                    .keyboardShortcut("=", modifiers: .command)
+                Button("Make Text Smaller") { adjustFont(delta: -1) }
+                    .keyboardShortcut("-", modifiers: .command)
+                Button("Reset Text Size") { resetFont() }
+                    .keyboardShortcut("0", modifiers: .command)
+            }
             CommandGroup(replacing: .appSettings) {
                 Button("Settings…") { PreferencesWindowController.shared.show(indexer: indexer) }
                     .keyboardShortcut(",", modifiers: .command)
             }
         }
     }
+}
+
+// MARK: - Font size helpers
+extension CodexHistoryApp {
+    private func adjustFont(delta: Double) {
+        let newSize = max(9, min(30, transcriptFontSize + delta))
+        transcriptFontSize = newSize
+    }
+    private func resetFont() { transcriptFontSize = 13 }
 }
 
 private struct ContentView: View {
