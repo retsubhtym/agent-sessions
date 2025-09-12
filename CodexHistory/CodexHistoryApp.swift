@@ -48,7 +48,6 @@ private struct ContentView: View {
     @State private var selection: String?
     @State private var selectedEvent: String?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
-    @State private var showingPreferences: Bool = false
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -72,19 +71,16 @@ private struct ContentView: View {
             }
             // Remove custom sidebar toggle to avoid duplicate titlebar button.
             ToolbarItem(placement: .automatic) {
-                Button(action: { showingPreferences = true }) {
+                Button(action: { openPreferences() }) {
                     Image(systemName: "gear")
                 }
                 .help("Preferences")
             }
         }
-        .sheet(isPresented: $showingPreferences) {
-            PreferencesView().environmentObject(indexer)
-        }
     }
 
     private func openPreferences() {
-        // Retained for menu command use; not used by the toolbar button anymore.
+        // Open the standard Settings window (Cmd- ,)
         NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
     }
 
