@@ -53,11 +53,15 @@ struct TranscriptPlainView: View {
     private var toolbar: some View {
         HStack(spacing: 8) {
             // Find controls
-            TextField("Find", text: $findText)
-                .textFieldStyle(.roundedBorder)
-                .frame(minWidth: 200)
-                .focused($findFocused)
-                .onSubmit { performFind(resetIndex: true) }
+            HStack(spacing: 6) {
+                Button(action: { performFind(resetIndex: true) }) { Image(systemName: "magnifyingglass") }
+                    .help("Find")
+                TextField("Find", text: $findText)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(minWidth: 200)
+                    .focused($findFocused)
+                    .onSubmit { performFind(resetIndex: true) }
+            }
             Button(action: { performFind(resetIndex: false, direction: -1) }) { Image(systemName: "chevron.up") }
                 .help("Previous match")
                 .disabled(findMatches.isEmpty)

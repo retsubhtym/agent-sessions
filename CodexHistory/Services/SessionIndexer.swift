@@ -84,6 +84,14 @@ final class SessionIndexer: ObservableObject {
             .store(in: &cancellables)
     }
 
+    // Trigger immediate recompute of filtered sessions using current filters (no debounce).
+    func recomputeNow() {
+        let filters = Filters(query: query, dateFrom: dateFrom, dateTo: dateTo, model: selectedModel, kinds: selectedKinds)
+        var results = FilterEngine.filterSessions(allSessions, filters: filters)
+        if hideZeroMessageSessionsPref { results = results.filter { $0.nonMetaCount > 0 } }
+        DispatchQueue.main.async { self.sessions = results }
+    }
+
     var modelsSeen: [String] {
         Array(Set(allSessions.compactMap { $0.model })).sorted()
     }

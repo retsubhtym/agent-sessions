@@ -6,12 +6,18 @@ struct SearchFiltersView: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            HStack {
-                Image(systemName: "magnifyingglass")
+            HStack(spacing: 6) {
+                Button(action: {
+                    // Focus the field and run an immediate recompute
+                    isSearchFocused = true
+                    indexer.recomputeNow()
+                }) { Image(systemName: "magnifyingglass") }
+                .buttonStyle(.borderless)
                 TextField("Search", text: $indexer.query)
                     .textFieldStyle(.plain)
                     .frame(minWidth: 160)
                     .focused($isSearchFocused)
+                    .onSubmit { indexer.recomputeNow() }
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 6)

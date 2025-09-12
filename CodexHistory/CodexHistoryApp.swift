@@ -48,6 +48,7 @@ private struct ContentView: View {
     @State private var selection: String?
     @State private var selectedEvent: String?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
+    @State private var showingPreferences: Bool = false
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -69,28 +70,25 @@ private struct ContentView: View {
                 }
                 .help("Refresh index")
             }
-            ToolbarItem(placement: .navigation) {
-                Button(action: toggleSidebar) {
-                    Image(systemName: "sidebar.left")
-                }
-                .help("Show/Hide Sidebar")
-            }
+            // Remove custom sidebar toggle to avoid duplicate titlebar button.
             ToolbarItem(placement: .automatic) {
-                Button(action: { openPreferences() }) {
+                Button(action: { showingPreferences = true }) {
                     Image(systemName: "gear")
                 }
                 .help("Preferences")
             }
         }
+        .sheet(isPresented: $showingPreferences) {
+            PreferencesView().environmentObject(indexer)
+        }
     }
 
     private func openPreferences() {
+        // Retained for menu command use; not used by the toolbar button anymore.
         NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
     }
 
-    private func toggleSidebar() {
-        NSApp.sendAction(#selector(NSSplitViewController.toggleSidebar(_:)), to: nil, from: nil)
-    }
+    // Rely on system-provided sidebar toggle in the titlebar.
 }
 
 private struct FirstRunPrompt: View {
