@@ -50,3 +50,11 @@ Plan Mode is a strict, analysis‑only interaction mode intended for early desig
   - Open Questions / Clarifications
 
 Exiting Plan Mode happens automatically when a subsequent prompt does not meet the entry criteria above. If a prompt asks to implement during Plan Mode, respond with a plan and explicitly note that implementation requires leaving Plan Mode.
+
+## Commit Policy (Project‑Wide)
+
+- No auto‑commits. This project uses an explicit approval model.
+- The assistant must not commit unless the user says “commit”.
+- When the user says “commit”, commit all uncommitted changes in one or more Conventional Commits as appropriate.
+- Prefer a single cohesive commit when a set of changes is logically related; otherwise, group by feature or subsystem, but still only after the user’s explicit “commit”.
+- Never assume partial commits are desired. If ambiguity exists, ask.
