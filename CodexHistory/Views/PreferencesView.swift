@@ -5,6 +5,7 @@ struct PreferencesView: View {
     @EnvironmentObject var indexer: SessionIndexer
     @State private var path: String = ""
     @State private var valid: Bool = true
+    @State private var theme: TranscriptTheme = .codexDark
 
     var body: some View {
         Form {
@@ -22,16 +23,27 @@ struct PreferencesView: View {
                     .foregroundStyle(.secondary)
                     .font(.caption)
             }
+            Section("Appearance") {
+                Picker("Theme", selection: $theme) {
+                    Text("Codex Dark").tag(TranscriptTheme.codexDark)
+                    Text("Monochrome").tag(TranscriptTheme.monochrome)
+                }
+            }
             HStack {
                 Spacer()
                 Button("Reset to Default") { path = ""; indexer.sessionsRootOverride = ""; validate(); indexer.refresh() }
-                Button("Apply") { indexer.sessionsRootOverride = path; indexer.refresh() }
+                Button("Apply") {
+                    indexer.sessionsRootOverride = path
+                    indexer.setTheme(theme)
+                    indexer.refresh()
+                }
             }
         }
         .padding(16)
         .onAppear {
             path = indexer.sessionsRootOverride
             validate()
+            theme = indexer.prefTheme
         }
     }
 

@@ -21,6 +21,11 @@
 		B000001C2A0A00010000000D /* SessionParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000011FA0A000100000001 /* SessionParserTests.swift */; };
 		B000001C2A0A00010000000E /* session_simple.jsonl in Resources */ = {isa = PBXBuildFile; fileRef = B00000121A0A000100000001 /* session_simple.jsonl */; };
 		B000001C2A0A00010000000F /* session_toolcall.jsonl in Resources */ = {isa = PBXBuildFile; fileRef = B00000122A0A000100000001 /* session_toolcall.jsonl */; };
+		B000001C2A0A000100000070 /* TranscriptTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000170A0A000100000001 /* TranscriptTheme.swift */; };
+		B000001C2A0A000100000071 /* SessionTranscriptBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000171A0A000100000001 /* SessionTranscriptBuilder.swift */; };
+		B000001C2A0A000100000072 /* TranscriptPlainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000175A0A000100000001 /* TranscriptPlainView.swift */; };
+		B000001C2A0A000100000073 /* session_branch.jsonl in Resources */ = {isa = PBXBuildFile; fileRef = B00000174A0A000100000001 /* session_branch.jsonl */; };
+		B000001C2A0A000100000074 /* TranscriptBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000173A0A000100000001 /* TranscriptBuilderTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +60,11 @@
         B00000121A0A000100000001 /* session_simple.jsonl */ = {isa = PBXFileReference; lastKnownFileType = text; name = session_simple.jsonl; path = Resources/Fixtures/session_simple.jsonl; sourceTree = SOURCE_ROOT; };
         B00000122A0A000100000001 /* session_toolcall.jsonl */ = {isa = PBXFileReference; lastKnownFileType = text; name = session_toolcall.jsonl; path = Resources/Fixtures/session_toolcall.jsonl; sourceTree = SOURCE_ROOT; };
         B00000123A0A000100000001 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
+        B00000170A0A000100000001 /* TranscriptTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TranscriptTheme.swift; path = CodexHistory/Services/TranscriptTheme.swift; sourceTree = SOURCE_ROOT; };
+        B00000171A0A000100000001 /* SessionTranscriptBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionTranscriptBuilder.swift; path = CodexHistory/Services/SessionTranscriptBuilder.swift; sourceTree = SOURCE_ROOT; };
+		B00000175A0A000100000001 /* TranscriptPlainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TranscriptPlainView.swift; path = CodexHistory/Views/TranscriptPlainView.swift; sourceTree = SOURCE_ROOT; };
+        B00000173A0A000100000001 /* TranscriptBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TranscriptBuilderTests.swift; path = CodexHistoryTests/TranscriptBuilderTests.swift; sourceTree = SOURCE_ROOT; };
+        B00000174A0A000100000001 /* session_branch.jsonl */ = {isa = PBXFileReference; lastKnownFileType = text; name = session_branch.jsonl; path = Resources/Fixtures/session_branch.jsonl; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,14 +100,14 @@
             path = CodexHistory;
             sourceTree = SOURCE_ROOT;
         };
-        B00000127A0A000100000001 /* CodexHistoryTests */ = {isa = PBXGroup; children = (B00000120A0A000100000001 /* Info.plist */, B0000011FA0A000100000001 /* SessionParserTests.swift */); path = CodexHistoryTests; sourceTree = SOURCE_ROOT; };
+        B00000127A0A000100000001 /* CodexHistoryTests */ = {isa = PBXGroup; children = (B00000120A0A000100000001 /* Info.plist */, B0000011FA0A000100000001 /* SessionParserTests.swift */, B00000173A0A000100000001 /* TranscriptBuilderTests.swift */); path = CodexHistoryTests; sourceTree = SOURCE_ROOT; };
         B00000128A0A000100000001 /* Resources */ = {isa = PBXGroup; children = (B0000012EA0A000100000001 /* Fixtures */); path = Resources; sourceTree = SOURCE_ROOT; };
         B00000129A0A000100000001 /* .github */ = {isa = PBXGroup; path = .github; sourceTree = SOURCE_ROOT; children = ( ); };
-        B0000012EA0A000100000001 /* Fixtures */ = {isa = PBXGroup; children = (B00000121A0A000100000001 /* session_simple.jsonl */, B00000122A0A000100000001 /* session_toolcall.jsonl */); path = Fixtures; sourceTree = "<group>"; };
+        B0000012EA0A000100000001 /* Fixtures */ = {isa = PBXGroup; children = (B00000121A0A000100000001 /* session_simple.jsonl */, B00000122A0A000100000001 /* session_toolcall.jsonl */, B00000174A0A000100000001 /* session_branch.jsonl */); path = Fixtures; sourceTree = "<group>"; };
         B0000012AA0A000100000001 /* Model */ = {isa = PBXGroup; children = (B00000113A0A000100000001 /* Session.swift */, B00000114A0A000100000001 /* SessionEvent.swift */); path = Model; sourceTree = "<group>"; };
-        B0000012BA0A000100000001 /* Services */ = {isa = PBXGroup; children = (B00000115A0A000100000001 /* SessionIndexer.swift */); path = Services; sourceTree = "<group>"; };
+        B0000012BA0A000100000001 /* Services */ = {isa = PBXGroup; children = (B00000115A0A000100000001 /* SessionIndexer.swift */, B00000170A0A000100000001 /* TranscriptTheme.swift */, B00000171A0A000100000001 /* SessionTranscriptBuilder.swift */); path = Services; sourceTree = "<group>"; };
         B0000012CA0A000100000001 /* Utilities */ = {isa = PBXGroup; children = (B0000011BA0A000100000001 /* JSONLReader.swift */, B0000011CA0A000100000001 /* PrettyJSON.swift */); path = Utilities; sourceTree = "<group>"; };
-        B0000012DA0A000100000001 /* Views */ = {isa = PBXGroup; children = (B00000116A0A000100000001 /* SessionsListView.swift */, B00000117A0A000100000001 /* SessionTimelineView.swift */, B00000118A0A000100000001 /* EventInspectorView.swift */, B00000119A0A000100000001 /* SearchFiltersView.swift */, B0000011AA0A000100000001 /* PreferencesView.swift */); path = Views; sourceTree = "<group>"; };
+		B0000012DA0A000100000001 /* Views */ = {isa = PBXGroup; children = (B00000116A0A000100000001 /* SessionsListView.swift */, B00000175A0A000100000001 /* TranscriptPlainView.swift */, B00000117A0A000100000001 /* SessionTimelineView.swift */, B00000118A0A000100000001 /* EventInspectorView.swift */, B00000119A0A000100000001 /* SearchFiltersView.swift */, B0000011AA0A000100000001 /* PreferencesView.swift */); path = Views; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -162,7 +172,7 @@
 
 /* Begin PBXResourcesBuildPhase section */
         B00000131A0A000100000001 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B000001C2A0A00010000000C /* Assets.xcassets in Resources */); runOnlyForDeploymentPostprocessing = 0; };
-        B00000133A0A000100000001 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B000001C2A0A00010000000E /* session_simple.jsonl in Resources */, B000001C2A0A00010000000F /* session_toolcall.jsonl in Resources */); runOnlyForDeploymentPostprocessing = 0; };
+        B00000133A0A000100000001 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B000001C2A0A00010000000E /* session_simple.jsonl in Resources */, B000001C2A0A00010000000F /* session_toolcall.jsonl in Resources */, B000001C2A0A000100000073 /* session_branch.jsonl in Resources */); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -171,15 +181,16 @@
                 B000001C2A0A000100000002 /* Session.swift in Sources */, 
                 B000001C2A0A000100000003 /* SessionEvent.swift in Sources */, 
                 B000001C2A0A000100000004 /* SessionIndexer.swift in Sources */, 
+                B000001C2A0A000100000070 /* TranscriptTheme.swift in Sources */,
+                B000001C2A0A000100000071 /* SessionTranscriptBuilder.swift in Sources */,
                 B000001C2A0A000100000005 /* SessionsListView.swift in Sources */, 
-                B000001C2A0A000100000006 /* SessionTimelineView.swift in Sources */, 
-                B000001C2A0A000100000007 /* EventInspectorView.swift in Sources */, 
+                B000001C2A0A000100000072 /* TranscriptPlainView.swift in Sources */, 
                 B000001C2A0A000100000008 /* SearchFiltersView.swift in Sources */, 
                 B000001C2A0A000100000009 /* PreferencesView.swift in Sources */, 
                 B000001C2A0A00010000000A /* JSONLReader.swift in Sources */, 
                 B000001C2A0A00010000000B /* PrettyJSON.swift in Sources */
             ); runOnlyForDeploymentPostprocessing = 0; };
-        B00000132A0A000100000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B000001C2A0A00010000000D /* SessionParserTests.swift in Sources */); runOnlyForDeploymentPostprocessing = 0; };
+        B00000132A0A000100000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B000001C2A0A00010000000D /* SessionParserTests.swift in Sources */, B000001C2A0A000100000074 /* TranscriptBuilderTests.swift in Sources */); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */

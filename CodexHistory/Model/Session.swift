@@ -13,6 +13,29 @@ public struct Session: Identifiable, Equatable, Codable {
     public var firstUserPreview: String? {
         events.first(where: { $0.kind == .user })?.text?.trimmingCharacters(in: .whitespacesAndNewlines)
     }
+
+    public var nonMetaCount: Int { events.filter { $0.kind != .meta }.count }
+
+    public var modifiedRelative: String {
+        let ref = endTime ?? startTime ?? Date()
+        let r = RelativeDateTimeFormatter()
+        r.unitsStyle = .short
+        return r.localizedString(for: ref, relativeTo: Date())
+    }
+
+    // Best-effort git branch detection
+    public var gitBranch: String? {
+        // 1) explicit metadata in any event json
+        for e in events {
+            if let branch = extractBranch(fromRawJSON: e.rawJSON) { return branch }
+        }
+        // 2) regex over tool_result/shell outputs (use text/toolOutput)
+        let texts = events.compactMap { $0.toolOutput ?? $0.text }
+        for t in texts {
+            if let b = extractBranch(fromOutput: t) { return b }
+        }
+        return nil
+    }
 }
 
 enum SessionDateSection: Hashable, Identifiable {
@@ -42,9 +65,10 @@ struct Filters: Equatable {
 
 enum FilterEngine {
     static func sessionMatches(_ session: Session, filters: Filters) -> Bool {
-        // Date range: compare session startTime (if present)
-        if let from = filters.dateFrom, let start = session.startTime, start < from { return false }
-        if let to = filters.dateTo, let start = session.startTime, start > to { return false }
+        // Date range: compare session endTime first (modified), fallback to startTime
+        let ref = session.endTime ?? session.startTime
+        if let from = filters.dateFrom, let t = ref, t < from { return false }
+        if let to = filters.dateTo, let t = ref, t > to { return false }
 
         if let m = filters.model, !m.isEmpty, session.model != m { return false }
 
@@ -114,4 +138,34 @@ extension ISO8601DateFormatter {
     static func cachedDayString(from date: Date) -> String {
         return day.string(from: date)
     }
+}
+
+// MARK: - Git branch helpers
+
+private func extractBranch(fromRawJSON raw: String) -> String? {
+    if let data = raw.data(using: .utf8),
+       let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+        if let b = obj["git_branch"] as? String { return b }
+        if let repo = obj["repo"] as? [String: Any], let b = repo["branch"] as? String { return b }
+        if let b = obj["branch"] as? String { return b }
+    }
+    return nil
+}
+
+private func extractBranch(fromOutput s: String) -> String? {
+    let patterns = [
+        "(?m)^On\\s+branch\\s+([A-Za-z0-9._/-]+)",
+        "(?m)^\\*\\s+([A-Za-z0-9._/-]+)$",
+        "(?m)^(?:heads/)?([A-Za-z0-9._/-]+)$"
+    ]
+    for p in patterns {
+        if let re = try? NSRegularExpression(pattern: p) {
+            let range = NSRange(location: 0, length: (s as NSString).length)
+            if let m = re.firstMatch(in: s, options: [], range: range), m.numberOfRanges >= 2 {
+                let r = m.range(at: 1)
+                if let swiftRange = Range(r, in: s) { return String(s[swiftRange]) }
+            }
+        }
+    }
+    return nil
 }

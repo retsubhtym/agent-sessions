@@ -18,6 +18,10 @@ public struct SessionEvent: Identifiable, Codable, Equatable {
     public let toolName: String?
     public let toolInput: String?
     public let toolOutput: String?
+    // Delta/stream grouping
+    public let messageID: String?
+    public let parentID: String?
+    public let isDelta: Bool
     public let rawJSON: String
 }
 

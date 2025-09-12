@@ -42,14 +42,15 @@ MVP features (implemented)
   - Streams JSONL line‑by‑line with tolerant decoding (keeps raw JSON when shape varies).
   - Builds `Session` models with metadata and `SessionEvent`s.
   - Refresh with in‑progress status and incremental updates.
-- Three‑pane SwiftUI UI
-  - Sidebar grouped by Today/Yesterday/yyyy‑MM‑dd/Older with badges and previews.
-  - Center timeline with role badges, relative timestamps (absolute tooltip), expandable rows.
-  - Inspector with `Pretty` and `Raw JSON` tabs; Copy buttons.
+- Two‑pane SwiftUI UI
+  - Sidebar grouped by Today/Yesterday/yyyy‑MM‑dd/Older with enriched rows (ID, modified, msgs, branch, summary, model).
+  - Transcript detail uses Codex‑like style with prefixes, role colors, optional timestamps, and ANSI export.
+- Whole‑session Raw/Pretty is currently hidden from menus.
 - Search + filters
   - Debounced full‑text search across all event text.
   - Filters: date range, model dropdown, message‑type toggles.
 - Preferences for path override (persisted in `UserDefaults`).
+ - Appearance: theme (Codex Dark / Monochrome), toggle timestamps.
 
 Privacy
 -------
@@ -71,4 +72,3 @@ Project structure
 - `Resources/Fixtures/` – test fixtures
 - `CodexHistoryTests/` – unit tests
 - `.github/workflows/ci.yml` – CI builds and tests on `macos-latest`
-

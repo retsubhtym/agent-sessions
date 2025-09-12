@@ -29,7 +29,9 @@ struct CodexHistoryApp: App {
             CommandGroup(after: .newItem) {
                 Button("Refresh") { indexer.refresh() }
                     .keyboardShortcut("r", modifiers: .command)
-                Button("Find") { indexer.requestFocusSearch.toggle() }
+                Button("Copy Transcript") { indexer.requestCopyPlain.toggle() }
+                    .keyboardShortcut("c", modifiers: .command)
+                Button("Find in Transcript") { indexer.requestTranscriptFindFocus.toggle() }
                     .keyboardShortcut("f", modifiers: .command)
             }
         }
@@ -45,14 +47,13 @@ private struct ContentView: View {
     @EnvironmentObject var indexer: SessionIndexer
     @State private var selection: String?
     @State private var selectedEvent: String?
+    @State private var columnVisibility: NavigationSplitViewVisibility = .all
 
     var body: some View {
-        NavigationSplitView(columnVisibility: .constant(.all)) {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             SessionsListView(selection: $selection)
-        } content: {
-            SessionTimelineView(sessionID: selection, selectedEventID: $selectedEvent)
         } detail: {
-            EventInspectorView(sessionID: selection, eventID: selectedEvent)
+            TranscriptPlainView(sessionID: selection)
         }
         .toolbar {
             ToolbarItem(placement: .automatic) {
@@ -68,6 +69,12 @@ private struct ContentView: View {
                 }
                 .help("Refresh index")
             }
+            ToolbarItem(placement: .navigation) {
+                Button(action: toggleSidebar) {
+                    Image(systemName: "sidebar.left")
+                }
+                .help("Show/Hide Sidebar")
+            }
             ToolbarItem(placement: .automatic) {
                 Button(action: { openPreferences() }) {
                     Image(systemName: "gear")
@@ -79,6 +86,10 @@ private struct ContentView: View {
 
     private func openPreferences() {
         NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+    }
+
+    private func toggleSidebar() {
+        NSApp.sendAction(#selector(NSSplitViewController.toggleSidebar(_:)), to: nil, from: nil)
     }
 }
 
