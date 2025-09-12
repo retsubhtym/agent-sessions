@@ -72,3 +72,8 @@ Project structure
 - `Resources/Fixtures/` – test fixtures
 - `CodexHistoryTests/` – unit tests
 - `.github/workflows/ci.yml` – CI builds and tests on `macos-latest`
+
+Documentation
+-------------
+- Codebase review (v0.1): `docs/codebase-0.1-review.md`
+- Changelog: `docs/CHANGELOG.md`
