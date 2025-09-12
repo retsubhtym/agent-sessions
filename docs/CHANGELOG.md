@@ -7,4 +7,5 @@ All notable changes to this project will be documented in this file.
  - Changed: Simplified toolbar — removed model picker, date range, and kind toggles; moved kind filtering to Preferences. Default hides sessions with zero messages (configurable in Preferences).
 - Improved: Parsing of timestamps, tool I/O, and streaming chunks; search filters (kinds) and toolbar wiring.
 - Docs: Added codebase review document in `docs/codebase-0.1-review.md` and updated to reflect simplified filters.
+ - Docs: Added `docs/session-images-v2.md` covering image storage patterns and the V2 plan for image rendering.
  - Docs/Data: Added session storage format doc (`docs/session-storage-format.md`) and introduced a minimal JSON Schema for normalized `SessionEvent` (`docs/schemas/session_event.schema.json`). See ADR 0001.
