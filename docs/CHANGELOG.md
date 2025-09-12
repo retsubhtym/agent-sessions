@@ -8,4 +8,5 @@ All notable changes to this project will be documented in this file.
 - Improved: Parsing of timestamps, tool I/O, and streaming chunks; search filters (kinds) and toolbar wiring.
 - Docs: Added codebase review document in `docs/codebase-0.1-review.md` and updated to reflect simplified filters.
  - Docs: Added `docs/session-images-v2.md` covering image storage patterns and the V2 plan for image rendering.
+ - UI: Removed custom sidebar toggle to avoid duplicate icon; added clickable magnifying‑glass actions for Search/Find; gear button opens Settings via a reliable Preferences window controller.
  - Docs/Data: Added session storage format doc (`docs/session-storage-format.md`) and introduced a minimal JSON Schema for normalized `SessionEvent` (`docs/schemas/session_event.schema.json`). See ADR 0001.

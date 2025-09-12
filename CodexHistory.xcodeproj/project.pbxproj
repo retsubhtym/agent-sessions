@@ -26,6 +26,9 @@
 		B000001C2A0A000100000072 /* TranscriptPlainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000175A0A000100000001 /* TranscriptPlainView.swift */; };
 		B000001C2A0A000100000073 /* session_branch.jsonl in Resources */ = {isa = PBXBuildFile; fileRef = B00000174A0A000100000001 /* session_branch.jsonl */; };
 		B000001C2A0A000100000074 /* TranscriptBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000173A0A000100000001 /* TranscriptBuilderTests.swift */; };
+		B000001C2A0A000100000075 /* PreferencesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000176A0A000100000001 /* PreferencesWindowController.swift */; };
+		B000001C2A0A000100000076 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000177A0A000100000001 /* FlowLayout.swift */; };
+		B000001C2A0A000100000077 /* AppAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000178A0A000100000001 /* AppAppearance.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,7 +55,8 @@
         B00000119A0A000100000001 /* SearchFiltersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SearchFiltersView.swift; path = CodexHistory/Views/SearchFiltersView.swift; sourceTree = SOURCE_ROOT; };
         B0000011AA0A000100000001 /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PreferencesView.swift; path = CodexHistory/Views/PreferencesView.swift; sourceTree = SOURCE_ROOT; };
         B0000011BA0A000100000001 /* JSONLReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = JSONLReader.swift; path = CodexHistory/Utilities/JSONLReader.swift; sourceTree = SOURCE_ROOT; };
-        B0000011CA0A000100000001 /* PrettyJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PrettyJSON.swift; path = CodexHistory/Utilities/PrettyJSON.swift; sourceTree = SOURCE_ROOT; };
+		B0000011CA0A000100000001 /* PrettyJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PrettyJSON.swift; path = CodexHistory/Utilities/PrettyJSON.swift; sourceTree = SOURCE_ROOT; };
+		B00000176A0A000100000001 /* PreferencesWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PreferencesWindowController.swift; path = CodexHistory/Utilities/PreferencesWindowController.swift; sourceTree = SOURCE_ROOT; };
         B0000011DA0A000100000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = CodexHistory/Assets.xcassets; sourceTree = SOURCE_ROOT; };
         B0000011EA0A000100000001 /* CodexHistoryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CodexHistoryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
         B0000011FA0A000100000001 /* SessionParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SessionParserTests.swift; path = CodexHistoryTests/SessionParserTests.swift; sourceTree = SOURCE_ROOT; };
@@ -65,6 +69,8 @@
 		B00000175A0A000100000001 /* TranscriptPlainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TranscriptPlainView.swift; path = CodexHistory/Views/TranscriptPlainView.swift; sourceTree = SOURCE_ROOT; };
         B00000173A0A000100000001 /* TranscriptBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TranscriptBuilderTests.swift; path = CodexHistoryTests/TranscriptBuilderTests.swift; sourceTree = SOURCE_ROOT; };
         B00000174A0A000100000001 /* session_branch.jsonl */ = {isa = PBXFileReference; lastKnownFileType = text; name = session_branch.jsonl; path = Resources/Fixtures/session_branch.jsonl; sourceTree = SOURCE_ROOT; };
+        B00000177A0A000100000001 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FlowLayout.swift; path = CodexHistory/Utilities/FlowLayout.swift; sourceTree = SOURCE_ROOT; };
+        B00000178A0A000100000001 /* AppAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppAppearance.swift; path = CodexHistory/Services/AppAppearance.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,8 +111,9 @@
         B00000129A0A000100000001 /* .github */ = {isa = PBXGroup; path = .github; sourceTree = SOURCE_ROOT; children = ( ); };
         B0000012EA0A000100000001 /* Fixtures */ = {isa = PBXGroup; children = (B00000121A0A000100000001 /* session_simple.jsonl */, B00000122A0A000100000001 /* session_toolcall.jsonl */, B00000174A0A000100000001 /* session_branch.jsonl */); path = Fixtures; sourceTree = "<group>"; };
         B0000012AA0A000100000001 /* Model */ = {isa = PBXGroup; children = (B00000113A0A000100000001 /* Session.swift */, B00000114A0A000100000001 /* SessionEvent.swift */); path = Model; sourceTree = "<group>"; };
-        B0000012BA0A000100000001 /* Services */ = {isa = PBXGroup; children = (B00000115A0A000100000001 /* SessionIndexer.swift */, B00000170A0A000100000001 /* TranscriptTheme.swift */, B00000171A0A000100000001 /* SessionTranscriptBuilder.swift */); path = Services; sourceTree = "<group>"; };
-        B0000012CA0A000100000001 /* Utilities */ = {isa = PBXGroup; children = (B0000011BA0A000100000001 /* JSONLReader.swift */, B0000011CA0A000100000001 /* PrettyJSON.swift */); path = Utilities; sourceTree = "<group>"; };
+        B0000012BA0A000100000001 /* Services */ = {isa = PBXGroup; children = (B00000115A0A000100000001 /* SessionIndexer.swift */, B00000170A0A000100000001 /* TranscriptTheme.swift */, B00000171A0A000100000001 /* SessionTranscriptBuilder.swift */, B00000178A0A000100000001 /* AppAppearance.swift */); path = Services; sourceTree = "<group>"; };
+        B0000012CA0A000100000001 /* Utilities */ = {isa = PBXGroup; children = (B0000011BA0A000100000001 /* JSONLReader.swift */, B0000011CA0A000100000001 /* PrettyJSON.swift */, B00000176A0A000100000001 /* PreferencesWindowController.swift */, B00000177A0A000100000001 /* FlowLayout.swift */); path = Utilities; sourceTree = "<group>"; };
+		// Insert new file into Utilities group
 		B0000012DA0A000100000001 /* Views */ = {isa = PBXGroup; children = (B00000116A0A000100000001 /* SessionsListView.swift */, B00000175A0A000100000001 /* TranscriptPlainView.swift */, B00000117A0A000100000001 /* SessionTimelineView.swift */, B00000118A0A000100000001 /* EventInspectorView.swift */, B00000119A0A000100000001 /* SearchFiltersView.swift */, B0000011AA0A000100000001 /* PreferencesView.swift */); path = Views; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
@@ -188,7 +195,10 @@
                 B000001C2A0A000100000008 /* SearchFiltersView.swift in Sources */, 
                 B000001C2A0A000100000009 /* PreferencesView.swift in Sources */, 
                 B000001C2A0A00010000000A /* JSONLReader.swift in Sources */, 
-                B000001C2A0A00010000000B /* PrettyJSON.swift in Sources */
+                B000001C2A0A00010000000B /* PrettyJSON.swift in Sources */,
+                B000001C2A0A000100000075 /* PreferencesWindowController.swift in Sources */,
+                B000001C2A0A000100000076 /* FlowLayout.swift in Sources */,
+                B000001C2A0A000100000077 /* AppAppearance.swift in Sources */
             ); runOnlyForDeploymentPostprocessing = 0; };
         B00000132A0A000100000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B000001C2A0A00010000000D /* SessionParserTests.swift in Sources */, B000001C2A0A000100000074 /* TranscriptBuilderTests.swift in Sources */); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */

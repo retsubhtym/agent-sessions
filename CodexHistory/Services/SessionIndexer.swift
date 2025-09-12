@@ -33,9 +33,12 @@ final class SessionIndexer: ObservableObject {
     @AppStorage("TranscriptTheme") private var themeRaw: String = TranscriptTheme.codexDark.rawValue
     @AppStorage("HideZeroMessageSessions") var hideZeroMessageSessionsPref: Bool = true
     @AppStorage("SelectedKindsRaw") private var selectedKindsRaw: String = ""
+    @AppStorage("AppAppearance") private var appearanceRaw: String = AppAppearance.system.rawValue
 
     var prefTheme: TranscriptTheme { TranscriptTheme(rawValue: themeRaw) ?? .codexDark }
     func setTheme(_ t: TranscriptTheme) { themeRaw = t.rawValue }
+    var appAppearance: AppAppearance { AppAppearance(rawValue: appearanceRaw) ?? .system }
+    func setAppearance(_ a: AppAppearance) { appearanceRaw = a.rawValue }
 
     private var cancellables = Set<AnyCancellable>()
 

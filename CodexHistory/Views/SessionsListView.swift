@@ -4,12 +4,21 @@ struct SessionsListView: View {
     @EnvironmentObject var indexer: SessionIndexer
     @Binding var selection: String?
     @State private var sortAscending: Bool = false
+    enum SortKey { case modified, msgs }
+    @State private var sortKey: SortKey = .modified
 
     private var sortedSessions: [Session] {
         indexer.sessions.sorted { a, b in
-            let la = a.endTime ?? a.startTime ?? .distantPast
-            let lb = b.endTime ?? b.startTime ?? .distantPast
-            return sortAscending ? (la < lb) : (la > lb)
+            switch sortKey {
+            case .modified:
+                let la = a.endTime ?? a.startTime ?? .distantPast
+                let lb = b.endTime ?? b.startTime ?? .distantPast
+                return sortAscending ? (la < lb) : (la > lb)
+            case .msgs:
+                let ca = a.nonMetaCount
+                let cb = b.nonMetaCount
+                return sortAscending ? (ca < cb) : (ca > cb)
+            }
         }
     }
 
@@ -39,11 +48,15 @@ struct SessionsListView: View {
                 .foregroundStyle(.secondary)
                 .frame(width: 50, alignment: .leading)
 
-            Button(action: { sortAscending.toggle() }) {
+            Button(action: {
+                if sortKey == .modified { sortAscending.toggle() } else { sortKey = .modified; sortAscending = false }
+            }) {
                 HStack(spacing: 4) {
                     Text("Modified")
-                    Image(systemName: sortAscending ? "arrowtriangle.up.fill" : "arrowtriangle.down.fill")
-                        .font(.caption2)
+                    if sortKey == .modified {
+                        Image(systemName: sortAscending ? "arrowtriangle.up.fill" : "arrowtriangle.down.fill")
+                            .font(.caption2)
+                    }
                 }
             }
             .buttonStyle(.plain)
@@ -52,10 +65,22 @@ struct SessionsListView: View {
             .frame(width: 90, alignment: .leading)
             .help("Sort by Modified (toggle ascending/descending)")
 
-            Text("Msgs")
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(.secondary)
-                .frame(width: 40, alignment: .trailing)
+            Button(action: {
+                if sortKey == .msgs { sortAscending.toggle() } else { sortKey = .msgs; sortAscending = false }
+            }) {
+                HStack(spacing: 4) {
+                    Text("Msgs")
+                    if sortKey == .msgs {
+                        Image(systemName: sortAscending ? "arrowtriangle.up.fill" : "arrowtriangle.down.fill")
+                            .font(.caption2)
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+            .font(.system(.caption, design: .monospaced))
+            .foregroundStyle(.secondary)
+            .frame(width: 40, alignment: .trailing)
+            .help("Sort by Msgs (toggle ascending/descending)")
 
             Text("Branch")
                 .font(.system(.caption, design: .monospaced))

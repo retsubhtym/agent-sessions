@@ -34,11 +34,10 @@ struct CodexHistoryApp: App {
                 Button("Find in Transcript") { indexer.requestTranscriptFindFocus.toggle() }
                     .keyboardShortcut("f", modifiers: .command)
             }
-        }
-
-        Settings {
-            PreferencesView()
-                .environmentObject(indexer)
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings…") { PreferencesWindowController.shared.show(indexer: indexer) }
+                    .keyboardShortcut(",", modifiers: .command)
+            }
         }
     }
 }
@@ -55,6 +54,7 @@ private struct ContentView: View {
         } detail: {
             TranscriptPlainView(sessionID: selection)
         }
+        .preferredColorScheme(indexer.appAppearance.colorScheme)
         .toolbar {
             ToolbarItem(placement: .automatic) {
                 SearchFiltersView()
@@ -69,19 +69,13 @@ private struct ContentView: View {
                 }
                 .help("Refresh index")
             }
-            // Remove custom sidebar toggle to avoid duplicate titlebar button.
             ToolbarItem(placement: .automatic) {
-                Button(action: { openPreferences() }) {
+                Button(action: { PreferencesWindowController.shared.show(indexer: indexer) }) {
                     Image(systemName: "gear")
                 }
                 .help("Preferences")
             }
         }
-    }
-
-    private func openPreferences() {
-        // Open the standard Settings window (Cmd- ,)
-        NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
     }
 
     // Rely on system-provided sidebar toggle in the titlebar.
