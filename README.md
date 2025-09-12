@@ -77,3 +77,4 @@ Documentation
 -------------
 - Codebase review (v0.1): `docs/codebase-0.1-review.md`
 - Changelog: `docs/CHANGELOG.md`
+- Session storage format: `docs/session-storage-format.md`
