@@ -42,6 +42,7 @@ final class SessionIndexer: ObservableObject {
     @AppStorage("SelectedKindsRaw") private var selectedKindsRaw: String = ""
     @AppStorage("AppAppearance") private var appearanceRaw: String = AppAppearance.system.rawValue
     @AppStorage("ModifiedDisplay") private var modifiedDisplayRaw: String = ModifiedDisplay.relative.rawValue
+    @AppStorage("TranscriptRenderMode") private var renderModeRaw: String = TranscriptRenderMode.normal.rawValue
 
     var prefTheme: TranscriptTheme { TranscriptTheme(rawValue: themeRaw) ?? .codexDark }
     func setTheme(_ t: TranscriptTheme) { themeRaw = t.rawValue }
@@ -56,6 +57,8 @@ final class SessionIndexer: ObservableObject {
     }
     var modifiedDisplay: ModifiedDisplay { ModifiedDisplay(rawValue: modifiedDisplayRaw) ?? .relative }
     func setModifiedDisplay(_ m: ModifiedDisplay) { modifiedDisplayRaw = m.rawValue }
+    var transcriptRenderMode: TranscriptRenderMode { TranscriptRenderMode(rawValue: renderModeRaw) ?? .normal }
+    func setTranscriptRenderMode(_ m: TranscriptRenderMode) { renderModeRaw = m.rawValue }
 
     private var cancellables = Set<AnyCancellable>()
 

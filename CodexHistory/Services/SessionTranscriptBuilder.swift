@@ -1,6 +1,13 @@
 import Foundation
 import SwiftUI
 
+// Render mode for transcripts
+public enum TranscriptRenderMode: String, CaseIterable, Identifiable, Codable {
+    case normal
+    case terminal
+    public var id: String { rawValue }
+}
+
 struct SessionTranscriptBuilder {
     static let outPrefix = "⟪out⟫"
     static let toolPrefix = "› tool:"
@@ -17,17 +24,16 @@ struct SessionTranscriptBuilder {
         static let bold = "\u{001B}[1m"
     }
 
-    struct Options { var showTimestamps: Bool; var showMeta: Bool }
+    struct Options { var showTimestamps: Bool; var showMeta: Bool; var renderMode: TranscriptRenderMode }
 
     // MARK: Public API
 
     /// New plain terminal transcript builder (no truncation, no styling)
-    static func buildPlainTerminalTranscript(session: Session, filters: TranscriptFilters) -> String {
-        let opts = options(from: filters)
+    static func buildPlainTerminalTranscript(session: Session, filters: TranscriptFilters, mode: TranscriptRenderMode = .normal) -> String {
+        let opts = options(from: filters, mode: mode)
         let blocks = coalesce(session: session, includeMeta: opts.showMeta)
         var out = ""
-        out += headerLine(session: session) + "\n"
-        out += String(repeating: "-", count: 80) + "\n"
+        // Intentionally omit session header and divider for a cleaner transcript view
         for b in blocks {
             out += render(block: b, options: opts)
             out += "\n"
@@ -36,7 +42,7 @@ struct SessionTranscriptBuilder {
     }
 
     static func buildANSI(session: Session, filters: TranscriptFilters) -> String {
-        let opts = options(from: filters)
+        let opts = options(from: filters, mode: .normal)
         var out = ""
         out += ANSI.bold + headerLine(session: session) + ANSI.reset + "\n"
         out += String(repeating: "─", count: 80) + "\n"
@@ -48,7 +54,7 @@ struct SessionTranscriptBuilder {
     }
 
     static func buildAttributed(session: Session, theme: TranscriptTheme, filters: TranscriptFilters) -> AttributedString {
-        let opts = options(from: filters)
+        let opts = options(from: filters, mode: .normal)
         let colors = theme.colors
         var attr = AttributedString("")
 
@@ -86,7 +92,7 @@ struct SessionTranscriptBuilder {
 
     // Legacy builders kept for compatibility in case other views still call them
     static func buildPlain(session: Session, filters: TranscriptFilters) -> String {
-        let opts = options(from: filters)
+        let opts = options(from: filters, mode: .normal)
         var lines: [String] = []
         lines.append(headerLine(session: session))
         lines.append(String(repeating: "-", count: 80))
@@ -174,11 +180,35 @@ struct SessionTranscriptBuilder {
 
     // MARK: Formatting helpers
 
-    private static func options(from filters: TranscriptFilters) -> Options {
+    private static func options(from filters: TranscriptFilters, mode: TranscriptRenderMode) -> Options {
         switch filters {
         case let .current(showTimestamps, showMeta):
-            return Options(showTimestamps: showTimestamps, showMeta: showMeta)
+            return Options(showTimestamps: showTimestamps, showMeta: showMeta, renderMode: mode)
         }
+    }
+
+    // Terminal rendering for tool_call events
+    private static func renderTerminalToolCall(name: String?, toolInput: String?, fallback: String) -> String {
+        guard let tool = name else { return "\(toolPrefix) \(fallback)" }
+        guard let input = toolInput, !input.isEmpty else { return "\(toolPrefix) \(tool)" }
+        if tool.lowercased() == "shell" {
+            if let data = input.data(using: .utf8),
+               let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                if let arr = obj["command"] as? [Any] {
+                    let parts = arr.compactMap { $0 as? String }
+                    if parts.count >= 3, parts[0] == "bash" {
+                        let header = parts[0...1].joined(separator: " ")
+                        let cmd = parts.dropFirst(2).joined(separator: " ")
+                        return header + "\n" + cmd
+                    } else if parts.count >= 1 {
+                        return parts.joined(separator: " ")
+                    }
+                }
+                if let script = obj["script"] as? String { return script }
+            }
+            return "\(toolPrefix) shell \(compactJSONOneLine(input))"
+        }
+        return "\(toolPrefix) \(tool) \(compactJSONOneLine(input))"
     }
 
     private static func headerLine(session: Session) -> String {
@@ -210,6 +240,7 @@ struct SessionTranscriptBuilder {
         var messageID: String?
         var toolName: String?
         var isDelta: Bool
+        var toolInput: String?
     }
 
     private static func block(from e: SessionEvent) -> LogicalBlock {
@@ -220,7 +251,7 @@ struct SessionTranscriptBuilder {
             return LogicalBlock(kind: .assistant, text: e.text ?? "", timestamp: e.timestamp, messageID: e.messageID, toolName: nil, isDelta: e.isDelta)
         case .tool_call:
             let rendered = renderToolCallLabel(name: e.toolName, args: e.toolInput)
-            return LogicalBlock(kind: .toolCall, text: rendered, timestamp: e.timestamp, messageID: e.messageID ?? e.parentID, toolName: e.toolName, isDelta: e.isDelta)
+            return LogicalBlock(kind: .toolCall, text: rendered, timestamp: e.timestamp, messageID: e.messageID ?? e.parentID, toolName: e.toolName, isDelta: e.isDelta, toolInput: e.toolInput)
         case .tool_result:
             return LogicalBlock(kind: .toolOut, text: e.toolOutput ?? "", timestamp: e.timestamp, messageID: e.messageID ?? e.parentID, toolName: e.toolName, isDelta: e.isDelta)
         case .error:
@@ -293,7 +324,11 @@ struct SessionTranscriptBuilder {
             }
         case .toolCall:
             let head = timestampPrefix(b.timestamp, options: options)
-            return head + "\(toolPrefix) \(b.text)"
+            if options.renderMode == .terminal {
+                return head + renderTerminalToolCall(name: b.toolName, toolInput: b.toolInput, fallback: b.text)
+            } else {
+                return head + "\(toolPrefix) \(b.text)"
+            }
         case .toolOut:
             guard !b.text.isEmpty else { return timestampPrefix(b.timestamp, options: options) + outPrefix }
             if let nl = b.text.firstIndex(of: "\n") {

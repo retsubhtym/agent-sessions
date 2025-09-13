@@ -13,11 +13,13 @@ struct TranscriptPlainView: View {
     @State private var findMatches: [Range<String.Index>] = []
     @State private var currentMatchIndex: Int = 0
     @FocusState private var findFocused: Bool
+    @State private var highlightRanges: [NSRange] = []
 
     // Toggles (view-scoped)
     @State private var showTimestamps: Bool = false
     @State private var showMeta: Bool = false
     @AppStorage("TranscriptFontSize") private var transcriptFontSize: Double = 13
+    @AppStorage("TranscriptRenderMode") private var renderModeRaw: String = TranscriptRenderMode.normal.rawValue
 
     // Raw sheet
     @State private var showRawSheet: Bool = false
@@ -28,12 +30,13 @@ struct TranscriptPlainView: View {
         VStack(spacing: 0) {
             toolbar
             Divider()
-            PlainTextScrollView(text: transcript, selection: selectedNSRange, fontSize: CGFloat(transcriptFontSize))
+            PlainTextScrollView(text: transcript, selection: selectedNSRange, fontSize: CGFloat(transcriptFontSize), highlights: highlightRanges, currentIndex: currentMatchIndex)
         }
         .onAppear { syncPrefs(); rebuild() }
         .onChange(of: sessionID) { _, _ in rebuild() }
         .onChange(of: indexer.sessions) { _, _ in rebuild() }
         .onChange(of: indexer.query) { _, _ in rebuild() }
+        .onChange(of: renderModeRaw) { _, _ in rebuild() }
         .onReceive(indexer.$requestCopyPlain) { _ in copyAll() }
         .onReceive(indexer.$requestTranscriptFindFocus) { _ in findFocused = true }
         .sheet(isPresented: $showRawSheet) { WholeSessionRawPrettySheet(session: currentSession) }
@@ -77,6 +80,12 @@ struct TranscriptPlainView: View {
             Toggle("Meta", isOn: $showMeta)
                 .onChange(of: showMeta) { _, _ in rebuild() }
             Spacer()
+            Picker("Mode", selection: $renderModeRaw) {
+                Text("Normal").tag(TranscriptRenderMode.normal.rawValue)
+                Text("Terminal").tag(TranscriptRenderMode.terminal.rawValue)
+            }
+            .pickerStyle(.segmented)
+            .frame(width: 180)
             HStack(spacing: 6) {
                 Button(action: { adjustFont(-1) }) {
                     Text("−").font(.system(size: 14, weight: .bold))
@@ -102,7 +111,8 @@ struct TranscriptPlainView: View {
     private func rebuild() {
         guard let s = currentSession else { transcript = ""; return }
         let filters: TranscriptFilters = .current(showTimestamps: showTimestamps, showMeta: showMeta)
-        transcript = SessionTranscriptBuilder.buildPlainTerminalTranscript(session: s, filters: filters)
+        let mode = TranscriptRenderMode(rawValue: renderModeRaw) ?? .normal
+        transcript = SessionTranscriptBuilder.buildPlainTerminalTranscript(session: s, filters: filters, mode: mode)
         // Reset find state
         performFind(resetIndex: true)
         selectedNSRange = nil
@@ -114,6 +124,7 @@ struct TranscriptPlainView: View {
         guard !q.isEmpty else {
             findMatches = []
             currentMatchIndex = 0
+            highlightRanges = []
             return
         }
         let lowerText = transcript.lowercased()
@@ -127,6 +138,12 @@ struct TranscriptPlainView: View {
             searchStart = r.upperBound
         }
         findMatches = matches
+        // Build NSRanges for temporary highlight attributes
+        var nsRanges: [NSRange] = []
+        for r in matches {
+            if let nsr = NSRange(r, in: transcript) as NSRange? { nsRanges.append(nsr) }
+        }
+        highlightRanges = nsRanges
         if resetIndex { currentMatchIndex = matches.isEmpty ? 0 : 0 }
         else if !matches.isEmpty {
             currentMatchIndex = (currentMatchIndex + direction + matches.count) % matches.count
@@ -147,6 +164,8 @@ private struct PlainTextScrollView: NSViewRepresentable {
     let text: String
     let selection: NSRange?
     let fontSize: CGFloat
+    let highlights: [NSRange]
+    let currentIndex: Int
 
     class Coordinator { var lastWidth: CGFloat = 0 }
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -173,6 +192,7 @@ private struct PlainTextScrollView: NSViewRepresentable {
         textView.textContainer?.containerSize = NSSize(width: scroll.contentSize.width, height: CGFloat.greatestFiniteMagnitude)
         textView.backgroundColor = .clear
         textView.string = text
+        applyHighlights(textView)
 
         scroll.documentView = textView
         if let sel = selection { textView.setSelectedRange(sel); textView.scrollRangeToVisible(sel) }
@@ -192,6 +212,23 @@ private struct PlainTextScrollView: NSViewRepresentable {
             if let sel = selection {
                 tv.setSelectedRange(sel)
                 tv.scrollRangeToVisible(sel)
+            }
+            applyHighlights(tv)
+        }
+    }
+
+    private func applyHighlights(_ tv: NSTextView) {
+        guard let lm = tv.layoutManager else { return }
+        let full = NSRange(location: 0, length: (tv.string as NSString).length)
+        lm.removeTemporaryAttribute(.backgroundColor, forCharacterRange: full)
+        guard !highlights.isEmpty else { return }
+        // Colors that read well in both light and dark appearances
+        let matchBG = NSColor.systemYellow.withAlphaComponent(0.35)
+        let currentBG = NSColor.systemOrange.withAlphaComponent(0.55)
+        for (i, r) in highlights.enumerated() {
+            if NSMaxRange(r) <= full.length {
+                let color = (i == currentIndex) ? currentBG : matchBG
+                lm.addTemporaryAttribute(.backgroundColor, value: color, forCharacterRange: r)
             }
         }
     }
