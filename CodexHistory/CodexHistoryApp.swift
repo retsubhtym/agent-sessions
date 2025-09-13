@@ -5,6 +5,7 @@ import AppKit
 struct CodexHistoryApp: App {
     @StateObject private var indexer = SessionIndexer()
     @AppStorage("TranscriptFontSize") private var transcriptFontSize: Double = 13
+    @AppStorage("LayoutMode") private var layoutModeRaw: String = LayoutMode.vertical.rawValue
     @State private var selectedSessionID: String?
     @State private var selectedEventID: String?
     @State private var focusSearchToggle: Bool = false
@@ -12,7 +13,11 @@ struct CodexHistoryApp: App {
 
     var body: some Scene {
         WindowGroup("CodexHistory") {
-            ContentView()
+            ContentView(layoutMode: LayoutMode(rawValue: layoutModeRaw) ?? .vertical,
+                        onToggleLayout: {
+                            let current = LayoutMode(rawValue: layoutModeRaw) ?? .vertical
+                            layoutModeRaw = (current == .vertical ? LayoutMode.horizontal : .vertical).rawValue
+                        })
                 .environmentObject(indexer)
                 .onAppear {
                     // First run check: if directory is unreadable prompt user
@@ -65,12 +70,25 @@ private struct ContentView: View {
     @State private var selection: String?
     @State private var selectedEvent: String?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
+    let layoutMode: LayoutMode
+    let onToggleLayout: () -> Void
 
     var body: some View {
-        NavigationSplitView(columnVisibility: $columnVisibility) {
-            SessionsListView(selection: $selection)
-        } detail: {
-            TranscriptPlainView(sessionID: selection)
+        Group {
+            if layoutMode == .vertical {
+                NavigationSplitView(columnVisibility: $columnVisibility) {
+                    SessionsListView(selection: $selection)
+                } detail: {
+                    TranscriptPlainView(sessionID: selection)
+                }
+            } else {
+                VSplitView {
+                    SessionsListView(selection: $selection)
+                        .frame(minHeight: 180)
+                    TranscriptPlainView(sessionID: selection)
+                        .frame(minHeight: 240)
+                }
+            }
         }
         .preferredColorScheme(indexer.appAppearance.colorScheme)
         .toolbar {
@@ -86,6 +104,12 @@ private struct ContentView: View {
                     }
                 }
                 .help("Refresh index")
+            }
+            ToolbarItem(placement: .automatic) {
+                Button(action: { onToggleLayout() }) {
+                    Image(systemName: layoutMode == .vertical ? "rectangle.split.1x2" : "rectangle.split.2x1")
+                }
+                .help(layoutMode == .vertical ? "Switch to Horizontal Split" : "Switch to Vertical Split")
             }
             ToolbarItem(placement: .automatic) {
                 Button(action: { PreferencesWindowController.shared.show(indexer: indexer) }) {
