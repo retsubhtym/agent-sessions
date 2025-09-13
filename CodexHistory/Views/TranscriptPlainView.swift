@@ -14,6 +14,9 @@ struct TranscriptPlainView: View {
     @State private var currentMatchIndex: Int = 0
     @FocusState private var findFocused: Bool
     @State private var highlightRanges: [NSRange] = []
+    @State private var commandRanges: [NSRange] = []
+    @State private var userRanges: [NSRange] = []
+    @AppStorage("ColorizeCommands") private var colorizeCommands: Bool = true
 
     // Toggles (view-scoped)
     @State private var showTimestamps: Bool = false
@@ -30,7 +33,7 @@ struct TranscriptPlainView: View {
         VStack(spacing: 0) {
             toolbar
             Divider()
-            PlainTextScrollView(text: transcript, selection: selectedNSRange, fontSize: CGFloat(transcriptFontSize), highlights: highlightRanges, currentIndex: currentMatchIndex)
+            PlainTextScrollView(text: transcript, selection: selectedNSRange, fontSize: CGFloat(transcriptFontSize), highlights: highlightRanges, currentIndex: currentMatchIndex, commandRanges: (renderModeRaw == TranscriptRenderMode.terminal.rawValue && colorizeCommands) ? commandRanges : [], userRanges: colorizeCommands ? userRanges : [])
         }
         .onAppear { syncPrefs(); rebuild() }
         .onChange(of: sessionID) { _, _ in rebuild() }
@@ -86,6 +89,9 @@ struct TranscriptPlainView: View {
             }
             .pickerStyle(.segmented)
             .frame(width: 180)
+            if renderModeRaw == TranscriptRenderMode.terminal.rawValue {
+                Toggle("Colorize", isOn: $colorizeCommands).toggleStyle(.switch)
+            }
             HStack(spacing: 6) {
                 Button(action: { adjustFont(-1) }) {
                     Text("−").font(.system(size: 14, weight: .bold))
@@ -112,7 +118,40 @@ struct TranscriptPlainView: View {
         guard let s = currentSession else { transcript = ""; return }
         let filters: TranscriptFilters = .current(showTimestamps: showTimestamps, showMeta: showMeta)
         let mode = TranscriptRenderMode(rawValue: renderModeRaw) ?? .normal
-        transcript = SessionTranscriptBuilder.buildPlainTerminalTranscript(session: s, filters: filters, mode: mode)
+        if mode == .terminal && colorizeCommands {
+            let built = SessionTranscriptBuilder.buildTerminalPlainWithRanges(session: s, filters: filters)
+            transcript = built.0
+            commandRanges = built.1
+            userRanges = built.2
+        } else {
+            transcript = SessionTranscriptBuilder.buildPlainTerminalTranscript(session: s, filters: filters, mode: mode)
+            commandRanges = []
+            // Build user ranges for normal mode if colorization enabled
+            if colorizeCommands && mode == .normal {
+                // Minimal pass to find user lines: they always start with optional timestamp then "> "
+                userRanges = []
+                let ns = transcript as NSString
+                let lines = transcript.split(separator: "\n", omittingEmptySubsequences: false)
+                var cursor = 0
+                for line in lines {
+                    let s = String(line)
+                    // Very lightweight detection: check for "> " prefix after optional HH:MM:SS {space}
+                    var lineStr = s
+                    if lineStr.count >= 9, lineStr[lineStr.index(lineStr.startIndex, offsetBy: 2)] == ":" {
+                        // naive skip timestamp like 12:34:56 
+                        if let space = lineStr.firstIndex(of: " ") { lineStr = String(lineStr[lineStr.index(after: space)...]) }
+                    }
+                    if lineStr.hasPrefix("> ") {
+                        let start = cursor + (ns.substring(with: NSRange(location: cursor, length: (s as NSString).length)) as NSString).range(of: "> ").location + 2
+                        let len = (s as NSString).length - ((ns.substring(with: NSRange(location: cursor, length: (s as NSString).length)) as NSString).range(of: "> ").location + 2)
+                        if len > 0 { userRanges.append(NSRange(location: start, length: len)) }
+                    }
+                    cursor += (s as NSString).length + 1
+                }
+            } else {
+                userRanges = []
+            }
+        }
         // Reset find state
         performFind(resetIndex: true)
         selectedNSRange = nil
@@ -166,6 +205,8 @@ private struct PlainTextScrollView: NSViewRepresentable {
     let fontSize: CGFloat
     let highlights: [NSRange]
     let currentIndex: Int
+    let commandRanges: [NSRange]
+    let userRanges: [NSRange]
 
     class Coordinator { var lastWidth: CGFloat = 0 }
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -221,6 +262,26 @@ private struct PlainTextScrollView: NSViewRepresentable {
         guard let lm = tv.layoutManager else { return }
         let full = NSRange(location: 0, length: (tv.string as NSString).length)
         lm.removeTemporaryAttribute(.backgroundColor, forCharacterRange: full)
+        lm.removeTemporaryAttribute(.foregroundColor, forCharacterRange: full)
+        // Command colorization (foreground)
+        if !commandRanges.isEmpty {
+            let green = NSColor.systemGreen
+            for r in commandRanges {
+                if NSMaxRange(r) <= full.length {
+                    lm.addTemporaryAttribute(.foregroundColor, value: green, forCharacterRange: r)
+                }
+            }
+        }
+        // User input colorization (blue)
+        if !userRanges.isEmpty {
+            let blue = NSColor.systemBlue
+            for r in userRanges {
+                if NSMaxRange(r) <= full.length {
+                    lm.addTemporaryAttribute(.foregroundColor, value: blue, forCharacterRange: r)
+                }
+            }
+        }
+        // Find match background highlights
         guard !highlights.isEmpty else { return }
         // Colors that read well in both light and dark appearances
         let matchBG = NSColor.systemYellow.withAlphaComponent(0.35)

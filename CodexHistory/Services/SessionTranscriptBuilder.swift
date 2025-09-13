@@ -41,6 +41,43 @@ struct SessionTranscriptBuilder {
         return out
     }
 
+    /// Terminal mode helper that also returns NSRanges for command lines and user text to enable styling in the UI.
+    static func buildTerminalPlainWithRanges(session: Session, filters: TranscriptFilters) -> (String, [NSRange], [NSRange]) {
+        let opts = options(from: filters, mode: .terminal)
+        let blocks = coalesce(session: session, includeMeta: opts.showMeta)
+        var out = ""
+        var commandRanges: [NSRange] = []
+        var userRanges: [NSRange] = []
+        func markRange(_ s: String, into array: inout [NSRange]) {
+            let start = (out as NSString).length
+            out += s
+            let len = (s as NSString).length
+            if len > 0 { array.append(NSRange(location: start, length: len)) }
+        }
+        for b in blocks {
+            switch b.kind {
+            case .toolCall:
+                let rendered = renderTerminalToolCall(name: b.toolName, toolInput: b.toolInput, fallback: b.text)
+                // Mark each command line as a command range
+                let lines = rendered.split(separator: "\n", omittingEmptySubsequences: false)
+                for (i, line) in lines.enumerated() {
+                    markRange(String(line), into: &commandRanges)
+                    if i < lines.count - 1 { out += "\n" }
+                }
+            case .user:
+                // Render exactly like render(block:) but also record user text ranges (exclude prefix/timestamp)
+                let head = timestampPrefix(b.timestamp, options: opts)
+                let prefix = userPrefix
+                out += head + prefix
+                markRange(b.text, into: &userRanges)
+            default:
+                out += render(block: b, options: opts)
+            }
+            out += "\n"
+        }
+        return (out, commandRanges, userRanges)
+    }
+
     static func buildANSI(session: Session, filters: TranscriptFilters) -> String {
         let opts = options(from: filters, mode: .normal)
         var out = ""
