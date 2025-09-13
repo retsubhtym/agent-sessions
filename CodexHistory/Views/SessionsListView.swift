@@ -84,7 +84,10 @@ struct SessionsListView: View {
 private func absoluteTime(_ date: Date?) -> String {
     guard let date else { return "" }
     let f = DateFormatter()
-    f.dateStyle = .medium
-    f.timeStyle = .medium
+    // Follow system locale and 12/24‑hour setting; avoid words like "at"
+    f.locale = .current
+    f.dateStyle = .short
+    f.timeStyle = .short
+    f.doesRelativeDateFormatting = false
     return f.string(from: date)
 }
