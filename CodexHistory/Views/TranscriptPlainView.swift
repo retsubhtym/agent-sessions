@@ -40,6 +40,7 @@ struct TranscriptPlainView: View {
         .onChange(of: indexer.sessions) { _, _ in rebuild() }
         .onChange(of: indexer.query) { _, _ in rebuild() }
         .onChange(of: renderModeRaw) { _, _ in rebuild() }
+        .onChange(of: colorizeCommands) { _, _ in rebuild() }
         .onReceive(indexer.$requestCopyPlain) { _ in copyAll() }
         .onReceive(indexer.$requestTranscriptFindFocus) { _ in findFocused = true }
         .sheet(isPresented: $showRawSheet) { WholeSessionRawPrettySheet(session: currentSession) }
@@ -83,15 +84,14 @@ struct TranscriptPlainView: View {
             Toggle("Meta", isOn: $showMeta)
                 .onChange(of: showMeta) { _, _ in rebuild() }
             Spacer()
-            Picker("Mode", selection: $renderModeRaw) {
-                Text("Normal").tag(TranscriptRenderMode.normal.rawValue)
+            Picker("", selection: $renderModeRaw) {
+                Text("Raw").tag(TranscriptRenderMode.normal.rawValue)
                 Text("Terminal").tag(TranscriptRenderMode.terminal.rawValue)
             }
             .pickerStyle(.segmented)
             .frame(width: 180)
-            if renderModeRaw == TranscriptRenderMode.terminal.rawValue {
-                Toggle("Colorize", isOn: $colorizeCommands).toggleStyle(.switch)
-            }
+            .labelsHidden()
+            Toggle("Colorize", isOn: $colorizeCommands).toggleStyle(.switch)
             HStack(spacing: 6) {
                 Button(action: { adjustFont(-1) }) {
                     Text("−").font(.system(size: 14, weight: .bold))
@@ -265,7 +265,13 @@ private struct PlainTextScrollView: NSViewRepresentable {
         lm.removeTemporaryAttribute(.foregroundColor, forCharacterRange: full)
         // Command colorization (foreground)
         if !commandRanges.isEmpty {
-            let green = NSColor.systemGreen
+            let isDark = (tv.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
+            let increaseContrast = NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast
+            let baseGreen = NSColor.systemGreen
+            let green: NSColor = {
+                if isDark || increaseContrast { return baseGreen }
+                return baseGreen.withAlphaComponent(0.88)
+            }()
             for r in commandRanges {
                 if NSMaxRange(r) <= full.length {
                     lm.addTemporaryAttribute(.foregroundColor, value: green, forCharacterRange: r)
@@ -274,7 +280,13 @@ private struct PlainTextScrollView: NSViewRepresentable {
         }
         // User input colorization (blue)
         if !userRanges.isEmpty {
-            let blue = NSColor.systemBlue
+            let isDark = (tv.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
+            let increaseContrast = NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast
+            let baseBlue = NSColor.systemBlue
+            let blue: NSColor = {
+                if isDark || increaseContrast { return baseBlue }
+                return baseBlue.withAlphaComponent(0.9)
+            }()
             for r in userRanges {
                 if NSMaxRange(r) <= full.length {
                     lm.addTemporaryAttribute(.foregroundColor, value: blue, forCharacterRange: r)
