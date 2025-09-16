@@ -95,6 +95,7 @@ private struct ContentView: View {
             ToolbarItem(placement: .automatic) {
                 SearchFiltersView()
             }
+            // Match Codex toggle temporarily removed while we align title logic
             ToolbarItem(placement: .automatic) {
                 Button(action: { indexer.refresh() }) {
                     if indexer.isIndexing {
@@ -118,6 +119,7 @@ private struct ContentView: View {
                 .help("Preferences")
             }
         }
+        // recomputeNow() is called inline in the toggle's setter
     }
 
     // Rely on system-provided sidebar toggle in the titlebar.

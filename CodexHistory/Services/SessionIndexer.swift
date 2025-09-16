@@ -27,10 +27,12 @@ final class SessionIndexer: ObservableObject {
     @Published var requestCopyPlain: Bool = false
     @Published var requestCopyANSI: Bool = false
     @Published var requestOpenRawSheet: Bool = false
+    // Project filter set by clicking the Project cell or via repo: operator
+    @Published var projectFilter: String? = nil
 
     // Sorting (mirrors UI's column sort state)
     struct SessionSortDescriptor: Equatable {
-        enum Key: Equatable { case modified, msgs, title }
+        enum Key: Equatable { case modified, msgs, repo, title }
         var key: Key
         var ascending: Bool
     }
@@ -43,6 +45,15 @@ final class SessionIndexer: ObservableObject {
     @AppStorage("AppAppearance") private var appearanceRaw: String = AppAppearance.system.rawValue
     @AppStorage("ModifiedDisplay") private var modifiedDisplayRaw: String = ModifiedDisplay.relative.rawValue
     @AppStorage("TranscriptRenderMode") private var renderModeRaw: String = TranscriptRenderMode.normal.rawValue
+    // Column visibility/order prefs
+    @AppStorage("ShowIDColumn") var showIDColumn: Bool = true
+    @AppStorage("ShowModifiedColumn") var showModifiedColumn: Bool = true
+    @AppStorage("ShowMsgsColumn") var showMsgsColumn: Bool = true
+    @AppStorage("ShowProjectColumn") var showProjectColumn: Bool = true
+    @AppStorage("ShowTitleColumn") var showTitleColumn: Bool = true
+    @AppStorage("ProjectBeforeTitle") var projectBeforeTitle: Bool = true
+    // Persist active project filter
+    @AppStorage("ProjectFilter") private var projectFilterStored: String = ""
 
     var prefTheme: TranscriptTheme { TranscriptTheme(rawValue: themeRaw) ?? .codexDark }
     func setTheme(_ t: TranscriptTheme) { themeRaw = t.rawValue }
@@ -63,6 +74,8 @@ final class SessionIndexer: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init() {
+        // Load persisted project filter
+        if !projectFilterStored.isEmpty { projectFilter = projectFilterStored }
         // Debounced computed sessions
         let inputs = Publishers.CombineLatest4(
             $query
@@ -80,7 +93,7 @@ final class SessionIndexer: ObservableObject {
             .receive(on: DispatchQueue.global(qos: .userInitiated))
             .map { [weak self] input, kinds, all -> [Session] in
                 let (q, from, to, model) = input
-                let filters = Filters(query: q, dateFrom: from, dateTo: to, model: model, kinds: kinds)
+                let filters = Filters(query: q, dateFrom: from, dateTo: to, model: model, kinds: kinds, repoName: self?.projectFilter, pathContains: nil)
                 var results = FilterEngine.filterSessions(all, filters: filters)
                 if self?.hideZeroMessageSessionsPref ?? true {
                     results = results.filter { $0.nonMetaCount > 0 }
@@ -105,11 +118,18 @@ final class SessionIndexer: ObservableObject {
             .removeDuplicates()
             .sink { [weak self] raw in self?.selectedKindsRaw = raw }
             .store(in: &cancellables)
+
+        // Persist project filter to AppStorage whenever it changes
+        $projectFilter
+            .map { $0 ?? "" }
+            .removeDuplicates()
+            .sink { [weak self] raw in self?.projectFilterStored = raw }
+            .store(in: &cancellables)
     }
 
     // Trigger immediate recompute of filtered sessions using current filters (no debounce).
     func recomputeNow() {
-        let filters = Filters(query: query, dateFrom: dateFrom, dateTo: dateTo, model: selectedModel, kinds: selectedKinds)
+        let filters = Filters(query: query, dateFrom: dateFrom, dateTo: dateTo, model: selectedModel, kinds: selectedKinds, repoName: projectFilter, pathContains: nil)
         var results = FilterEngine.filterSessions(allSessions, filters: filters)
         if hideZeroMessageSessionsPref { results = results.filter { $0.nonMetaCount > 0 } }
         DispatchQueue.main.async { self.sessions = results }
@@ -268,6 +288,10 @@ final class SessionIndexer: ObservableObject {
                 if !pieces.isEmpty { text = pieces.joined() }
             }
 
+            // Heuristic: environment_context appears as an XML-ish block often logged under 'user'.
+            // Treat any event whose text contains this block as meta regardless of role/type.
+            if let t = text, t.contains("<environment_context>") { type = "environment_context" }
+
             // tool fields
             if let t = obj["tool"] as? String { toolName = t }
             if toolName == nil, let name = obj["name"] as? String { toolName = name }
@@ -389,3 +413,5 @@ final class SessionIndexer: ObservableObject {
         }
     }
 }
+
+// (Codex picker parity helpers temporarily disabled while focusing on title parity.)

@@ -33,6 +33,75 @@ public struct Session: Identifiable, Equatable, Codable {
         return "No prompt"
     }
 
+    // MARK: - Codex picker parity helpers
+    // Title used by Codex's --resume picker: first plain user message found in the
+    // head of the file (first 10 records). If none found, the session is not shown.
+    public var codexPreviewTitle: String? {
+        let head = events.prefix(10)
+        // Prefer first plain user message
+        if let t = head.first(where: { $0.kind == .user && !($0.text?.trimmedEmpty ?? true) })?.text?.collapsedWhitespace() {
+            return t
+        }
+        // Fallback: first shell/tool command in head as a one-liner
+        if let call = head.first(where: { $0.kind == .tool_call && ($0.toolName?.lowercased().contains("shell") == true || $0.toolName?.lowercased().contains("bash") == true || $0.toolName?.lowercased().contains("sh") == true) }) {
+            if let cmd = Self.firstCommandLine(from: call.toolInput) { return cmd }
+        }
+        return nil
+    }
+
+    // Extract timestamp and UUID from rollout filename for Codex sort order.
+    // rollout-YYYY-MM-DDThh-mm-ss-<uuid>.jsonl
+    public var codexFilenameTimestamp: Date? {
+        guard let match = Self.rolloutRegex.firstMatch(in: (filePath as NSString).lastPathComponent) else { return nil }
+        let ts = match.ts
+        return Self.rolloutDateFormatter.date(from: ts)
+    }
+
+    public var codexFilenameUUID: String? {
+        guard let match = Self.rolloutRegex.firstMatch(in: (filePath as NSString).lastPathComponent) else { return nil }
+        return match.uuid
+    }
+
+    // When showing Match Codex view, prefer the preview title, else fall back
+    // to our general-purpose title so the table always has text.
+    public var codexDisplayTitle: String { codexPreviewTitle ?? title }
+
+    // MARK: - Repo/CWD helpers
+    public var cwd: String? {
+        // 1) Look for XML-ish environment_context blocks in text
+        let pattern = #"<cwd>(.*?)</cwd>"#
+        if let re = try? NSRegularExpression(pattern: pattern) {
+            for e in events {
+                if let t = e.text {
+                    let ns = t as NSString
+                    let range = NSRange(location: 0, length: ns.length)
+                    if let m = re.firstMatch(in: t, range: range), m.numberOfRanges >= 2 {
+                        let r = m.range(at: 1)
+                        let str = ns.substring(with: r).trimmingCharacters(in: .whitespacesAndNewlines)
+                        if !str.isEmpty { return str }
+                    }
+                }
+            }
+        }
+        // 2) Look for JSON field "cwd" in raw JSON
+        for e in events {
+            if let data = e.rawJSON.data(using: .utf8),
+               let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let c = obj["cwd"] as? String, !c.isEmpty {
+                return c
+            }
+        }
+        return nil
+    }
+    public var repoName: String? {
+        guard let cwd else { return nil }
+        if let info = Self.gitInfo(from: cwd) { return URL(fileURLWithPath: info.root).lastPathComponent }
+        return nil
+    }
+    public var repoDisplay: String { repoName ?? "—" }
+    public var isWorktree: Bool { (cwd.flatMap { Self.gitInfo(from: $0)?.isWorktree }) ?? false }
+    public var isSubmodule: Bool { (cwd.flatMap { Self.gitInfo(from: $0)?.isSubmodule }) ?? false }
+
     public var nonMetaCount: Int { events.filter { $0.kind != .meta }.count }
 
     public var modifiedRelative: String {
@@ -82,10 +151,17 @@ struct Filters: Equatable {
     var dateTo: Date?
     var model: String?
     var kinds: Set<SessionEventKind> = Set(SessionEventKind.allCases)
+    var repoName: String? = nil
+    var pathContains: String? = nil
 }
 
 enum FilterEngine {
     static func sessionMatches(_ session: Session, filters: Filters) -> Bool {
+        // Parse query operators repo: and path:
+        let parsed = parseOperators(filters.query)
+        let effectiveRepo = filters.repoName ?? parsed.repo
+        let pathSubstr = filters.pathContains ?? parsed.path
+
         // Date range: compare session endTime first (modified), fallback to startTime
         let ref = session.endTime ?? session.startTime
         if let from = filters.dateFrom, let t = ref, t < from { return false }
@@ -93,10 +169,20 @@ enum FilterEngine {
 
         if let m = filters.model, !m.isEmpty, session.model != m { return false }
 
+        if let repo = effectiveRepo, !repo.isEmpty {
+            guard let r = session.repoName?.lowercased() else { return false }
+            if !r.contains(repo.lowercased()) { return false }
+        }
+
+        if let p = pathSubstr, !p.isEmpty {
+            guard let path = session.cwd?.lowercased() else { return false }
+            if !path.contains(p.lowercased()) { return false }
+        }
+
         // Kinds: session must have any event in selected kinds
         if !session.events.contains(where: { filters.kinds.contains($0.kind) }) { return false }
 
-        let q = filters.query.trimmingCharacters(in: .whitespacesAndNewlines)
+        let q = parsed.freeText.trimmingCharacters(in: .whitespacesAndNewlines)
         if q.isEmpty { return true }
         let lower = q.lowercased()
         // Full-text across event text/tool fields
@@ -112,6 +198,27 @@ enum FilterEngine {
     static func filterSessions(_ sessions: [Session], filters: Filters) -> [Session] {
         sessions.filter { sessionMatches($0, filters: filters) }
             .sorted { ($0.startTime ?? .distantPast) > ($1.startTime ?? .distantPast) }
+    }
+
+    private struct ParsedQuery { let freeText: String; let repo: String?; let path: String? }
+    private static func parseOperators(_ q: String) -> ParsedQuery {
+        guard !q.isEmpty else { return ParsedQuery(freeText: "", repo: nil, path: nil) }
+        var repo: String? = nil
+        var path: String? = nil
+        var remaining: [String] = []
+        for raw in q.split(separator: " ") {
+            let token = String(raw)
+            if token.hasPrefix("repo:") {
+                let v = String(token.dropFirst(5)).trimmingCharacters(in: CharacterSet(charactersIn: "\"'"))
+                if !v.isEmpty { repo = v; continue }
+            }
+            if token.hasPrefix("path:") {
+                let v = String(token.dropFirst(5)).trimmingCharacters(in: CharacterSet(charactersIn: "\"'"))
+                if !v.isEmpty { path = v; continue }
+            }
+            remaining.append(token)
+        }
+        return ParsedQuery(freeText: remaining.joined(separator: " "), repo: repo, path: path)
     }
 }
 
@@ -168,6 +275,7 @@ private extension String {
         let parts = self.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
         return parts.joined(separator: " ")
     }
+    var trimmedEmpty: Bool { self.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 }
 
 private func extractBranch(fromRawJSON raw: String) -> String? {
@@ -196,4 +304,74 @@ private func extractBranch(fromOutput s: String) -> String? {
         }
     }
     return nil
+}
+
+// MARK: - Rollout filename regex helpers
+private struct RolloutMatch { let ts: String; let uuid: String }
+private struct RolloutRegex {
+    private let regex: NSRegularExpression
+    init() { regex = try! NSRegularExpression(pattern: "^rollout-([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}-[0-9]{2}-[0-9]{2})-([0-9a-fA-F-]+)\\.jsonl$") }
+    func firstMatch(in name: String) -> RolloutMatch? {
+        let range = NSRange(location: 0, length: (name as NSString).length)
+        guard let m = regex.firstMatch(in: name, range: range), m.numberOfRanges >= 3 else { return nil }
+        let ns = name as NSString
+        return RolloutMatch(ts: ns.substring(with: m.range(at: 1)), uuid: ns.substring(with: m.range(at: 2)))
+    }
+}
+
+private extension Session {
+    static let rolloutRegex = RolloutRegex()
+    static let rolloutDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "yyyy-MM-dd'T'HH-mm-ss"
+        return f
+    }()
+    static func firstCommandLine(from raw: String?) -> String? {
+        guard var s = raw?.trimmingCharacters(in: .whitespacesAndNewlines), !s.isEmpty else { return nil }
+        // Try to parse JSON object
+        if let data = s.data(using: .utf8), let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            // common keys
+            if let v = (obj["command"] ?? obj["cmd"] ?? obj["script"] ?? obj["args"]) {
+                if let str = v as? String { s = str }
+                else if let arr = v as? [Any] { s = arr.map { String(describing: $0) }.joined(separator: " ") }
+            }
+        }
+        // If multi-line, take first non-empty line
+        for line in s.components(separatedBy: .newlines) {
+            let t = line.trimmingCharacters(in: .whitespaces)
+            if !t.isEmpty { return t }
+        }
+        return s
+    }
+
+    // Try to find a Git repository root by walking up from cwd.
+    struct GitInfo { let root: String; let isWorktree: Bool; let isSubmodule: Bool }
+    static func gitInfo(from start: String, maxLevels: Int = 6) -> GitInfo? {
+        var url = URL(fileURLWithPath: start)
+        let fm = FileManager.default
+        for _ in 0..<maxLevels {
+            let dotGitDir = url.appendingPathComponent(".git")
+            var isDir: ObjCBool = false
+            if fm.fileExists(atPath: dotGitDir.path, isDirectory: &isDir), isDir.boolValue {
+                // Regular repo root
+                return GitInfo(root: url.path, isWorktree: false, isSubmodule: false)
+            }
+            // .git file pointing to gitdir
+            if fm.fileExists(atPath: dotGitDir.path) {
+                if let data = try? String(contentsOf: dotGitDir, encoding: .utf8),
+                   let range = data.range(of: "gitdir:") {
+                    let path = data[range.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines)
+                    let lower = path.lowercased()
+                    let worktree = lower.contains(".git/worktrees/")
+                    let submodule = lower.contains(".git/modules/")
+                    return GitInfo(root: url.path, isWorktree: worktree, isSubmodule: submodule)
+                }
+            }
+            let parent = url.deletingLastPathComponent()
+            if parent.path == url.path { break }
+            url = parent
+        }
+        return nil
+    }
 }

@@ -20,7 +20,6 @@ struct TranscriptPlainView: View {
 
     // Toggles (view-scoped)
     @State private var showTimestamps: Bool = false
-    @State private var showMeta: Bool = false
     @AppStorage("TranscriptFontSize") private var transcriptFontSize: Double = 13
     @AppStorage("TranscriptRenderMode") private var renderModeRaw: String = TranscriptRenderMode.normal.rawValue
 
@@ -81,8 +80,6 @@ struct TranscriptPlainView: View {
                     .foregroundStyle(.secondary)
             }
             Divider().frame(height: 20)
-            Toggle("Meta", isOn: $showMeta)
-                .onChange(of: showMeta) { _, _ in rebuild() }
             Spacer()
             Picker("", selection: $renderModeRaw) {
                 Text("Raw").tag(TranscriptRenderMode.normal.rawValue)
@@ -116,7 +113,7 @@ struct TranscriptPlainView: View {
 
     private func rebuild() {
         guard let s = currentSession else { transcript = ""; return }
-        let filters: TranscriptFilters = .current(showTimestamps: showTimestamps, showMeta: showMeta)
+        let filters: TranscriptFilters = .current(showTimestamps: showTimestamps, showMeta: false)
         let mode = TranscriptRenderMode(rawValue: renderModeRaw) ?? .normal
         if mode == .terminal && colorizeCommands {
             let built = SessionTranscriptBuilder.buildTerminalPlainWithRanges(session: s, filters: filters)

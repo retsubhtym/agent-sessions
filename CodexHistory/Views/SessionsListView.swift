@@ -6,22 +6,22 @@ struct SessionsListView: View {
     // Table selection uses Set; keep a single-selection bridge
     @State private var tableSelection: Set<String> = []
     // Table sort order uses comparators
-    @State private var sortOrder: [KeyPathComparator<Session>] = [ .init(\Session.modifiedAt, order: .reverse) ]
+    @State private var sortOrder: [KeyPathComparator<Session>] = []
 
-    private var rows: [Session] {
-        indexer.sessions.sorted(using: sortOrder)
-    }
+    private var rows: [Session] { indexer.sessions.sorted(using: sortOrder) }
 
     var body: some View {
         Table(rows, selection: $tableSelection, sortOrder: $sortOrder) {
-            TableColumn("ID", value: \.shortID) { s in
+            // ID (always present; hide via zero width)
+            TableColumn("ID", value: \Session.shortID) { s in
                 Text(s.shortID)
                     .font(.system(size: 13, weight: .bold, design: .monospaced))
                     .foregroundStyle(.secondary)
             }
-            .width(min: 64, ideal: 64, max: 64)
+            .width(min: indexer.showIDColumn ? 64 : 0, ideal: indexer.showIDColumn ? 64 : 0, max: indexer.showIDColumn ? 64 : 0)
 
-            TableColumn("Modified", value: \.modifiedAt) { s in
+            // Modified
+            TableColumn("Modified", value: \Session.modifiedAt) { s in
                 let display = indexer.modifiedDisplay
                 let primary = (display == .relative) ? s.modifiedRelative : absoluteTime(s.modifiedAt)
                 let helpText = (display == .relative) ? absoluteTime(s.modifiedAt) : s.modifiedRelative
@@ -30,33 +30,48 @@ struct SessionsListView: View {
                     .foregroundStyle(.secondary)
                     .help(helpText)
             }
-            .width(min: 120, ideal: 120, max: 140)
+            .width(min: indexer.showModifiedColumn ? 120 : 0, ideal: indexer.showModifiedColumn ? 120 : 0, max: indexer.showModifiedColumn ? 140 : 0)
 
-            TableColumn("Msgs", value: \.nonMetaCount) { s in
+            // Msgs
+            TableColumn("Msgs", value: \Session.nonMetaCount) { s in
                 Text(String(format: "%3d", s.nonMetaCount))
                     .font(.system(size: 13, weight: .regular, design: .monospaced))
             }
-            .width(min: 64, ideal: 64, max: 80)
+            .width(min: indexer.showMsgsColumn ? 64 : 0, ideal: indexer.showMsgsColumn ? 64 : 0, max: indexer.showMsgsColumn ? 80 : 0)
 
-            TableColumn("Title", value: \.title) { s in
-                Text(s.title)
+            // Project (fixed position to avoid TableColumnContent availability issues)
+            TableColumn("Project", value: \Session.repoDisplay) { s in
+                Text(s.repoDisplay)
+                    .font(.system(size: 13))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .help(projectTooltip(for: s))
+                    .onTapGesture { if let name = s.repoName { indexer.projectFilter = name; indexer.recomputeNow() } }
+            }
+            .width(min: indexer.showProjectColumn ? 120 : 0, ideal: indexer.showProjectColumn ? 160 : 0, max: indexer.showProjectColumn ? 240 : 0)
+
+            // Title
+            TableColumn("Title", value: \Session.title) { s in
+                Text(s.codexDisplayTitle)
                     .font(.system(size: 13))
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
-            .width(min: 160, ideal: 320)
+            .width(min: indexer.showTitleColumn ? 160 : 0, ideal: indexer.showTitleColumn ? 320 : 0, max: indexer.showTitleColumn ? 2000 : 0)
         }
         .tableStyle(.inset(alternatesRowBackgrounds: true))
         .environment(\.defaultMinListRowHeight, 22)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
         .navigationTitle("Sessions")
+        // No Codex matching mode for now; always show Codex-style titles, full list
         .onChange(of: sortOrder) { _, newValue in
             if let first = newValue.first {
                 // Map to view model descriptor
                 let key: SessionIndexer.SessionSortDescriptor.Key
                 if first.keyPath == \Session.modifiedAt { key = .modified }
                 else if first.keyPath == \Session.nonMetaCount { key = .msgs }
+                else if first.keyPath == \Session.repoDisplay { key = .repo }
                 else { key = .title }
                 indexer.sortDescriptor = .init(key: key, ascending: first.order == .forward)
             }
@@ -68,6 +83,9 @@ struct SessionsListView: View {
         .onAppear {
             // Seed initial selection
             if let sel = selection { tableSelection = [sel] }
+            if sortOrder.isEmpty {
+                sortOrder = [ KeyPathComparator(\Session.modifiedAt, order: .reverse) ]
+            }
         }
     }
 
@@ -80,6 +98,8 @@ struct SessionsListView: View {
     }
 }
 
+// (Column builder helpers removed to maintain compatibility with older macOS toolchains.)
+
 // Helper for tooltip formatting
 private func absoluteTime(_ date: Date?) -> String {
     guard let date else { return "" }
@@ -90,4 +110,14 @@ private func absoluteTime(_ date: Date?) -> String {
     f.timeStyle = .short
     f.doesRelativeDateFormatting = false
     return f.string(from: date)
+}
+
+private func projectTooltip(for s: Session) -> String {
+    var parts: [String] = []
+    if let path = s.cwd { parts.append(path) }
+    var badges: [String] = []
+    if s.isWorktree { badges.append("worktree") }
+    if s.isSubmodule { badges.append("submodule") }
+    if !badges.isEmpty { parts.append("[" + badges.joined(separator: ", ") + "]") }
+    return parts.joined(separator: " ")
 }

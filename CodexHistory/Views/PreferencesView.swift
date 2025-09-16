@@ -76,6 +76,21 @@ struct PreferencesView: View {
                 }
             }
 
+            GroupBox(label: Text("Columns").bold()) {
+                VStack(alignment: .leading, spacing: 8) {
+                    PrefRowSpacer {
+                        Toggle("Show ID", isOn: $indexer.showIDColumn)
+                        Toggle("Show Modified", isOn: $indexer.showModifiedColumn)
+                        Toggle("Show Msgs", isOn: $indexer.showMsgsColumn)
+                        Toggle("Show Project", isOn: $indexer.showProjectColumn)
+                        Toggle("Show Title", isOn: $indexer.showTitleColumn)
+                    }
+                    PrefRowSpacer {
+                        Toggle("Project before Title", isOn: $indexer.projectBeforeTitle)
+                    }
+                }
+            }
+
             HStack {
                 Spacer()
                 Button("Reset to Default") { path = ""; indexer.sessionsRootOverride = ""; validate(); indexer.refresh(); appearance = .system; indexer.setAppearance(.system); modifiedDisplay = .relative; indexer.setModifiedDisplay(.relative) }

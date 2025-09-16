@@ -9,6 +9,7 @@ This document describes how Codex CLI persists per‑session logs on disk and wh
 
 References:
 - Codex repo/issues discuss JSONL storage and date‑sharded folders. See openai/codex issue threads on sessions and logging format. (Example: rollout‑*.jsonl in date shards.)
+- For how Codex enumerates and resumes sessions, see `docs/codex-resume.md`.
 
 ## File Structure
 - Encoding: UTF‑8.
@@ -132,6 +133,12 @@ Example (reasoning item excerpt within a response):
 - For images:
   - Inline Base64: render lazily and cap size.
   - URL/file reference: show a placeholder with an explicit fetch action.
+
+## Resume Integration
+- Codex’s `--resume` picker lists files newest-first by timestamp embedded in the filename (not mtime), with a stable UUID tiebreaker. Pagination is page-sized (25) with a scan cap (100) per fetch.
+- The picker’s preview line is the first plain user message found within the first 10 JSONL records.
+- The list is global across all repos; Codex does not filter by cwd. App-level repo filters are optional conveniences.
+- Launching Codex to resume a specific session can be done via a config override: `codex --config experimental_resume=/abs/path/to/rollout-*.jsonl`. See `docs/codex-resume.md`.
 
 ## JSON Schema (Normalized Output)
 For contributors and downstream tooling, a minimal schema for our normalized `SessionEvent` lives at:
