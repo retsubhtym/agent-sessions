@@ -8,7 +8,7 @@ struct PreferencesView: View {
     // Appearance
     @State private var appearance: AppAppearance = .system
     @State private var modifiedDisplay: SessionIndexer.ModifiedDisplay = .relative
-    @State private var localKinds: Set<SessionEventKind> = Set(SessionEventKind.allCases)
+    // Filtering UI removed; keep state minimal
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -48,33 +48,7 @@ struct PreferencesView: View {
                 }
             }
 
-            GroupBox(label: Text("Filtering").bold()) {
-                VStack(alignment: .leading, spacing: 8) {
-                    PrefRowSpacer {
-                        Toggle("Hide sessions with zero messages", isOn: $indexer.hideZeroMessageSessionsPref)
-                    }
-                    PrefRow(label: "Kinds") {
-                        // Single line row; chips wrap when space permits
-                        Flow(spacing: 8) {
-                            ForEach(SessionEventKind.allCases, id: \.self) { kind in
-                                Toggle(kindLabel(kind), isOn: Binding(
-                                    get: { localKinds.contains(kind) },
-                                    set: { newVal in
-                                        if newVal { localKinds.insert(kind) } else { localKinds.remove(kind) }
-                                    }
-                                ))
-                                .toggleStyle(.button)
-                            }
-                        }
-                    }
-                    PrefRowSpacer {
-                        HStack(spacing: 8) {
-                            Button("Select All") { localKinds = Set(SessionEventKind.allCases) }
-                            Button("Select None") { localKinds = [] }
-                        }
-                    }
-                }
-            }
+            // Filtering section hidden per user request
 
             GroupBox(label: Text("Columns").bold()) {
                 VStack(alignment: .leading, spacing: 8) {
@@ -98,7 +72,6 @@ struct PreferencesView: View {
                     indexer.sessionsRootOverride = path
                     indexer.setAppearance(appearance)
                     indexer.setModifiedDisplay(modifiedDisplay)
-                    indexer.selectedKinds = localKinds
                     indexer.refresh()
                 }
             }
@@ -109,7 +82,6 @@ struct PreferencesView: View {
             validate()
             appearance = indexer.appAppearance
             modifiedDisplay = indexer.modifiedDisplay
-            localKinds = indexer.selectedKinds
         }
     }
 
@@ -158,13 +130,4 @@ private struct PrefRowSpacer<Content: View>: View {
     }
 }
 
-private func kindLabel(_ k: SessionEventKind) -> String {
-    switch k {
-    case .user: return "User"
-    case .assistant: return "Assistant"
-    case .tool_call: return "Tool Call"
-    case .tool_result: return "Tool Result"
-    case .error: return "Error"
-    case .meta: return "Meta"
-    }
-}
+// Filtering labels removed with section
