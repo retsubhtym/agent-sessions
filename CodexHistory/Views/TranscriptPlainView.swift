@@ -16,12 +16,16 @@ struct TranscriptPlainView: View {
     @State private var highlightRanges: [NSRange] = []
     @State private var commandRanges: [NSRange] = []
     @State private var userRanges: [NSRange] = []
-    @AppStorage("ColorizeCommands") private var colorizeCommands: Bool = true
 
     // Toggles (view-scoped)
     @State private var showTimestamps: Bool = false
     @AppStorage("TranscriptFontSize") private var transcriptFontSize: Double = 13
     @AppStorage("TranscriptRenderMode") private var renderModeRaw: String = TranscriptRenderMode.normal.rawValue
+    
+    // Auto-colorize in Terminal mode
+    private var shouldColorize: Bool {
+        return renderModeRaw == TranscriptRenderMode.terminal.rawValue
+    }
 
     // Raw sheet
     @State private var showRawSheet: Bool = false
@@ -32,14 +36,13 @@ struct TranscriptPlainView: View {
         VStack(spacing: 0) {
             toolbar
             Divider()
-            PlainTextScrollView(text: transcript, selection: selectedNSRange, fontSize: CGFloat(transcriptFontSize), highlights: highlightRanges, currentIndex: currentMatchIndex, commandRanges: (renderModeRaw == TranscriptRenderMode.terminal.rawValue && colorizeCommands) ? commandRanges : [], userRanges: colorizeCommands ? userRanges : [])
+            PlainTextScrollView(text: transcript, selection: selectedNSRange, fontSize: CGFloat(transcriptFontSize), highlights: highlightRanges, currentIndex: currentMatchIndex, commandRanges: shouldColorize ? commandRanges : [], userRanges: shouldColorize ? userRanges : [])
         }
         .onAppear { syncPrefs(); rebuild() }
         .onChange(of: sessionID) { _, _ in rebuild() }
         .onChange(of: indexer.sessions) { _, _ in rebuild() }
         .onChange(of: indexer.query) { _, _ in rebuild() }
         .onChange(of: renderModeRaw) { _, _ in rebuild() }
-        .onChange(of: colorizeCommands) { _, _ in rebuild() }
         .onReceive(indexer.$requestCopyPlain) { _ in copyAll() }
         .onReceive(indexer.$requestTranscriptFindFocus) { _ in findFocused = true }
         .sheet(isPresented: $showRawSheet) { WholeSessionRawPrettySheet(session: currentSession) }
@@ -81,14 +84,13 @@ struct TranscriptPlainView: View {
             }
             Divider().frame(height: 20)
             Spacer()
-            Picker("", selection: $renderModeRaw) {
-                Text("Raw").tag(TranscriptRenderMode.normal.rawValue)
+            Picker("View Style", selection: $renderModeRaw) {
+                Text("Conversation").tag(TranscriptRenderMode.normal.rawValue)
                 Text("Terminal").tag(TranscriptRenderMode.terminal.rawValue)
             }
             .pickerStyle(.segmented)
-            .frame(width: 180)
+            .frame(width: 200)
             .labelsHidden()
-            Toggle("Colorize", isOn: $colorizeCommands).toggleStyle(.switch)
             HStack(spacing: 6) {
                 Button(action: { adjustFont(-1) }) {
                     Text("−").font(.system(size: 14, weight: .bold))
@@ -115,7 +117,7 @@ struct TranscriptPlainView: View {
         guard let s = currentSession else { transcript = ""; return }
         let filters: TranscriptFilters = .current(showTimestamps: showTimestamps, showMeta: false)
         let mode = TranscriptRenderMode(rawValue: renderModeRaw) ?? .normal
-        if mode == .terminal && colorizeCommands {
+        if mode == .terminal && shouldColorize {
             let built = SessionTranscriptBuilder.buildTerminalPlainWithRanges(session: s, filters: filters)
             transcript = built.0
             commandRanges = built.1
@@ -124,7 +126,7 @@ struct TranscriptPlainView: View {
             transcript = SessionTranscriptBuilder.buildPlainTerminalTranscript(session: s, filters: filters, mode: mode)
             commandRanges = []
             // Build user ranges for normal mode if colorization enabled
-            if colorizeCommands && mode == .normal {
+            if shouldColorize && mode == .normal {
                 // Minimal pass to find user lines: they always start with optional timestamp then "> "
                 userRanges = []
                 let ns = transcript as NSString
