@@ -16,6 +16,9 @@ struct TranscriptPlainView: View {
     @State private var highlightRanges: [NSRange] = []
     @State private var commandRanges: [NSRange] = []
     @State private var userRanges: [NSRange] = []
+    @State private var assistantRanges: [NSRange] = []
+    @State private var outputRanges: [NSRange] = []
+    @State private var errorRanges: [NSRange] = []
 
     // Toggles (view-scoped)
     @State private var showTimestamps: Bool = false
@@ -36,7 +39,7 @@ struct TranscriptPlainView: View {
         VStack(spacing: 0) {
             toolbar
             Divider()
-            PlainTextScrollView(text: transcript, selection: selectedNSRange, fontSize: CGFloat(transcriptFontSize), highlights: highlightRanges, currentIndex: currentMatchIndex, commandRanges: shouldColorize ? commandRanges : [], userRanges: shouldColorize ? userRanges : [])
+            PlainTextScrollView(text: transcript, selection: selectedNSRange, fontSize: CGFloat(transcriptFontSize), highlights: highlightRanges, currentIndex: currentMatchIndex, commandRanges: shouldColorize ? commandRanges : [], userRanges: shouldColorize ? userRanges : [], assistantRanges: shouldColorize ? assistantRanges : [], outputRanges: shouldColorize ? outputRanges : [], errorRanges: shouldColorize ? errorRanges : [])
         }
         .onAppear { syncPrefs(); rebuild() }
         .onChange(of: sessionID) { _, _ in rebuild() }
@@ -85,7 +88,7 @@ struct TranscriptPlainView: View {
             Divider().frame(height: 20)
             Spacer()
             Picker("View Style", selection: $renderModeRaw) {
-                Text("Conversation").tag(TranscriptRenderMode.normal.rawValue)
+                Text("Transcript").tag(TranscriptRenderMode.normal.rawValue)
                 Text("Terminal").tag(TranscriptRenderMode.terminal.rawValue)
             }
             .pickerStyle(.segmented)
@@ -122,33 +125,54 @@ struct TranscriptPlainView: View {
             transcript = built.0
             commandRanges = built.1
             userRanges = built.2
+            // Still need to find assistant, output, and error ranges for terminal mode
+            assistantRanges = []
+            outputRanges = []
+            errorRanges = []
+            findAdditionalRanges()
         } else {
             transcript = SessionTranscriptBuilder.buildPlainTerminalTranscript(session: s, filters: filters, mode: mode)
             commandRanges = []
-            // Build user ranges for normal mode if colorization enabled
-            if shouldColorize && mode == .normal {
-                // Minimal pass to find user lines: they always start with optional timestamp then "> "
+            // Build additional ranges for colorization
+            if shouldColorize {
                 userRanges = []
+                assistantRanges = []
+                outputRanges = []
+                errorRanges = []
+                
+                // Find user input ranges in normal mode
                 let ns = transcript as NSString
                 let lines = transcript.split(separator: "\n", omittingEmptySubsequences: false)
                 var cursor = 0
+                
                 for line in lines {
                     let s = String(line)
-                    // Very lightweight detection: check for "> " prefix after optional HH:MM:SS {space}
                     var lineStr = s
+                    var timestampOffset = 0
                     if lineStr.count >= 9, lineStr[lineStr.index(lineStr.startIndex, offsetBy: 2)] == ":" {
-                        // naive skip timestamp like 12:34:56 
-                        if let space = lineStr.firstIndex(of: " ") { lineStr = String(lineStr[lineStr.index(after: space)...]) }
+                        if let space = lineStr.firstIndex(of: " ") { 
+                            timestampOffset = lineStr.distance(from: lineStr.startIndex, to: lineStr.index(after: space))
+                            lineStr = String(lineStr[lineStr.index(after: space)...]) 
+                        }
                     }
+                    
+                    // User input: "> text"
                     if lineStr.hasPrefix("> ") {
-                        let start = cursor + (ns.substring(with: NSRange(location: cursor, length: (s as NSString).length)) as NSString).range(of: "> ").location + 2
-                        let len = (s as NSString).length - ((ns.substring(with: NSRange(location: cursor, length: (s as NSString).length)) as NSString).range(of: "> ").location + 2)
+                        let start = cursor + timestampOffset + 2
+                        let len = (s as NSString).length - timestampOffset - 2
                         if len > 0 { userRanges.append(NSRange(location: start, length: len)) }
                     }
+                    
                     cursor += (s as NSString).length + 1
                 }
+                
+                // Find other content types
+                findAdditionalRanges()
             } else {
                 userRanges = []
+                assistantRanges = []
+                outputRanges = []
+                errorRanges = []
             }
         }
         // Reset find state
@@ -194,6 +218,46 @@ struct TranscriptPlainView: View {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(transcript, forType: .string)
     }
+    
+    private func findAdditionalRanges() {
+        let ns = transcript as NSString
+        let lines = transcript.split(separator: "\n", omittingEmptySubsequences: false)
+        var cursor = 0
+        
+        for line in lines {
+            let s = String(line)
+            // Skip timestamp prefix if present (HH:MM:SS format)
+            var lineStr = s
+            var timestampOffset = 0
+            if lineStr.count >= 9, lineStr[lineStr.index(lineStr.startIndex, offsetBy: 2)] == ":" {
+                if let space = lineStr.firstIndex(of: " ") { 
+                    timestampOffset = lineStr.distance(from: lineStr.startIndex, to: lineStr.index(after: space))
+                    lineStr = String(lineStr[lineStr.index(after: space)...]) 
+                }
+            }
+            
+            // Tool output: "⟪out⟫ text"
+            if lineStr.hasPrefix("⟪out⟫ ") {
+                let start = cursor + timestampOffset
+                let len = (s as NSString).length - timestampOffset
+                if len > 0 { outputRanges.append(NSRange(location: start, length: len)) }
+            }
+            // Errors: "! error text"
+            else if lineStr.hasPrefix("! error ") {
+                let start = cursor + timestampOffset
+                let len = (s as NSString).length - timestampOffset
+                if len > 0 { errorRanges.append(NSRange(location: start, length: len)) }
+            }
+            // Assistant responses: everything else that's not empty and not a known prefix
+            else if !lineStr.isEmpty && !lineStr.hasPrefix("⟪") && !lineStr.hasPrefix("›") && !lineStr.hasPrefix("!") && !lineStr.hasPrefix("> ") && !lineStr.hasPrefix("bash ") && !lineStr.hasPrefix("cd ") {
+                let start = cursor + timestampOffset
+                let len = (s as NSString).length - timestampOffset
+                if len > 0 { assistantRanges.append(NSRange(location: start, length: len)) }
+            }
+            
+            cursor += (s as NSString).length + 1
+        }
+    }
 }
 
 // MARK: - NSViewRepresentable plain text, selectable, scrollable
@@ -206,6 +270,9 @@ private struct PlainTextScrollView: NSViewRepresentable {
     let currentIndex: Int
     let commandRanges: [NSRange]
     let userRanges: [NSRange]
+    let assistantRanges: [NSRange]
+    let outputRanges: [NSRange]
+    let errorRanges: [NSRange]
 
     class Coordinator { var lastWidth: CGFloat = 0 }
     func makeCoordinator() -> Coordinator { Coordinator() }
@@ -289,6 +356,51 @@ private struct PlainTextScrollView: NSViewRepresentable {
             for r in userRanges {
                 if NSMaxRange(r) <= full.length {
                     lm.addTemporaryAttribute(.foregroundColor, value: blue, forCharacterRange: r)
+                }
+            }
+        }
+        // Assistant response colorization (subtle purple/gray)
+        if !assistantRanges.isEmpty {
+            let isDark = (tv.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
+            let increaseContrast = NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast
+            let basePurple = NSColor.systemPurple
+            let purple: NSColor = {
+                if isDark || increaseContrast { return basePurple.withAlphaComponent(0.8) }
+                return basePurple.withAlphaComponent(0.7)
+            }()
+            for r in assistantRanges {
+                if NSMaxRange(r) <= full.length {
+                    lm.addTemporaryAttribute(.foregroundColor, value: purple, forCharacterRange: r)
+                }
+            }
+        }
+        // Tool output colorization (dimmed green)
+        if !outputRanges.isEmpty {
+            let isDark = (tv.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
+            let increaseContrast = NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast
+            let baseGreen = NSColor.systemGreen
+            let dimmedGreen: NSColor = {
+                if isDark || increaseContrast { return baseGreen.withAlphaComponent(0.6) }
+                return baseGreen.withAlphaComponent(0.5)
+            }()
+            for r in outputRanges {
+                if NSMaxRange(r) <= full.length {
+                    lm.addTemporaryAttribute(.foregroundColor, value: dimmedGreen, forCharacterRange: r)
+                }
+            }
+        }
+        // Error colorization (red)
+        if !errorRanges.isEmpty {
+            let isDark = (tv.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
+            let increaseContrast = NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast
+            let baseRed = NSColor.systemRed
+            let red: NSColor = {
+                if isDark || increaseContrast { return baseRed }
+                return baseRed.withAlphaComponent(0.9)
+            }()
+            for r in errorRanges {
+                if NSMaxRange(r) <= full.length {
+                    lm.addTemporaryAttribute(.foregroundColor, value: red, forCharacterRange: r)
                 }
             }
         }
