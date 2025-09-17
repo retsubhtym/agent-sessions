@@ -123,7 +123,7 @@ struct TranscriptPlainView: View {
                 // Font size controls
                 HStack(spacing: 2) {
                     Button(action: { adjustFont(-1) }) {
-                        Text("−").font(.system(size: 14, weight: .bold))
+                        Image(systemName: "textformat.size.smaller")
                             .frame(width: 20, height: 20)
                     }
                     .buttonStyle(.borderless)
@@ -131,7 +131,7 @@ struct TranscriptPlainView: View {
                     .help("Smaller (Cmd-)")
                     
                     Button(action: { adjustFont(1) }) {
-                        Text("+").font(.system(size: 14, weight: .bold))
+                        Image(systemName: "textformat.size.larger")
                             .frame(width: 20, height: 20)
                     }
                     .buttonStyle(.borderless)
