@@ -50,8 +50,8 @@ struct SessionsListView: View {
             }
             .width(min: indexer.showProjectColumn ? 120 : 0, ideal: indexer.showProjectColumn ? 160 : 0, max: indexer.showProjectColumn ? 240 : 0)
 
-            // Title
-            TableColumn("Title", value: \Session.title) { s in
+            // Session
+            TableColumn("Session", value: \Session.title) { s in
                 Text(s.codexDisplayTitle)
                     .font(.system(size: 13))
                     .lineLimit(1)

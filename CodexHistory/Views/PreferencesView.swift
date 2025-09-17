@@ -57,7 +57,7 @@ struct PreferencesView: View {
                         Toggle("Show Modified", isOn: $indexer.showModifiedColumn)
                         Toggle("Show Msgs", isOn: $indexer.showMsgsColumn)
                         Toggle("Show Project", isOn: $indexer.showProjectColumn)
-                        Toggle("Show Title", isOn: $indexer.showTitleColumn)
+                        Toggle("Show Session", isOn: $indexer.showTitleColumn)
                     }
                     PrefRowSpacer {
                         Toggle("Project before Title", isOn: $indexer.projectBeforeTitle)
