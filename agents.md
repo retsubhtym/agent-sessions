@@ -1,4 +1,4 @@
-# Triada Agents Playbook
+# CodexHistory Agents Playbook
 
 ## Required workflow (for humans and agents)
 1) Use Conventional Commits for every commit.
@@ -13,14 +13,14 @@
    - Add a 1–2 bullet note in /docs/summaries/YYYY-MM.md.
 
 ## Commit message examples
-- feat(ui): add week header tap target
+- feat(ui): add session title visibility in vertical layout
   Tool: Cursor
   Model: gpt-5-thinking
 
-- refactor(data): migrate to SwiftData for events
-  Tool: Codex
-  Model: gpt-5 high
-  Why: Enables queries and relationships; removes manual Codable layer
+- fix(model): correct timezone handling for filename timestamps
+  Tool: Cursor
+  Model: gpt-5-thinking
+  Why: Filename timestamps are in local time, not UTC
 
 ## Plan Mode
 
@@ -30,7 +30,7 @@ Plan Mode is a strict, analysis‑only interaction mode intended for early desig
   - Any prompt that starts with `++` enters Plan Mode.
   - Any prompt that contains the phrase "plan mode" (case‑insensitive) enters Plan Mode.
 
-- What’s prohibited in Plan Mode
+- What's prohibited in Plan Mode
   - No file edits of any kind: do not create, modify, or delete files.
   - Do not run patching or write commands (e.g., `apply_patch`, `git commit`, code generation that alters the repo).
   - No schema/data migrations or build configuration changes.
@@ -54,7 +54,7 @@ Exiting Plan Mode happens automatically when a subsequent prompt does not meet t
 ## Commit Policy (Project‑Wide)
 
 - No auto‑commits. This project uses an explicit approval model.
-- The assistant must not commit unless the user says “commit”.
-- When the user says “commit”, commit all uncommitted changes in one or more Conventional Commits as appropriate.
-- Prefer a single cohesive commit when a set of changes is logically related; otherwise, group by feature or subsystem, but still only after the user’s explicit “commit”.
+- The assistant must not commit unless the user says "commit".
+- When the user says "commit", commit all uncommitted changes in one or more Conventional Commits as appropriate.
+- Prefer a single cohesive commit when a set of changes is logically related; otherwise, group by feature or subsystem, but still only after the user's explicit "commit".
 - Never assume partial commits are desired. If ambiguity exists, ask.

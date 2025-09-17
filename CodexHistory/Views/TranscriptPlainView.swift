@@ -38,6 +38,8 @@ struct TranscriptPlainView: View {
     var body: some View {
         VStack(spacing: 0) {
             toolbar
+                .frame(maxWidth: .infinity)
+                .background(Color(NSColor.controlBackgroundColor))
             Divider()
             PlainTextScrollView(text: transcript, selection: selectedNSRange, fontSize: CGFloat(transcriptFontSize), highlights: highlightRanges, currentIndex: currentMatchIndex, commandRanges: shouldColorize ? commandRanges : [], userRanges: shouldColorize ? userRanges : [], assistantRanges: shouldColorize ? assistantRanges : [], outputRanges: shouldColorize ? outputRanges : [], errorRanges: shouldColorize ? errorRanges : [])
         }
@@ -64,52 +66,87 @@ struct TranscriptPlainView: View {
     }
 
     private var toolbar: some View {
-        HStack(spacing: 8) {
-            // Find controls
-            HStack(spacing: 6) {
-                Button(action: { performFind(resetIndex: true) }) { Image(systemName: "magnifyingglass") }
-                    .help("Find")
+        HStack(spacing: 6) {
+            // Find controls group
+            HStack(spacing: 4) {
+                Button(action: { performFind(resetIndex: true) }) { 
+                    Image(systemName: "magnifyingglass")
+                        .frame(width: 16, height: 16)
+                }
+                .buttonStyle(.borderless)
+                .help("Find")
+                
                 TextField("Find", text: $findText)
                     .textFieldStyle(.roundedBorder)
-                    .frame(minWidth: 200)
+                    .frame(minWidth: 120, maxWidth: 180)
                     .focused($findFocused)
                     .onSubmit { performFind(resetIndex: true) }
-            }
-            Button(action: { performFind(resetIndex: false, direction: -1) }) { Image(systemName: "chevron.up") }
+                
+                Button(action: { performFind(resetIndex: false, direction: -1) }) { 
+                    Image(systemName: "chevron.up")
+                        .frame(width: 16, height: 16)
+                }
+                .buttonStyle(.borderless)
                 .help("Previous match")
                 .disabled(findMatches.isEmpty)
-            Button(action: { performFind(resetIndex: false, direction: 1) }) { Image(systemName: "chevron.down") }
+                
+                Button(action: { performFind(resetIndex: false, direction: 1) }) { 
+                    Image(systemName: "chevron.down")
+                        .frame(width: 16, height: 16)
+                }
+                .buttonStyle(.borderless)
                 .help("Next match")
                 .disabled(findMatches.isEmpty)
-            if !findText.isEmpty {
-                Text("\(findMatches.isEmpty ? 0 : currentMatchIndex + 1)/\(findMatches.count)")
-                    .foregroundStyle(.secondary)
+                
+                if !findText.isEmpty {
+                    Text("\(findMatches.isEmpty ? 0 : currentMatchIndex + 1)/\(findMatches.count)")
+                        .foregroundStyle(.secondary)
+                        .font(.system(size: 11, design: .monospaced))
+                        .frame(minWidth: 35)
+                }
             }
+            
             Divider().frame(height: 20)
-            Spacer()
-            Picker("View Style", selection: $renderModeRaw) {
-                Text("Transcript").tag(TranscriptRenderMode.normal.rawValue)
-                Text("Terminal").tag(TranscriptRenderMode.terminal.rawValue)
-            }
-            .pickerStyle(.segmented)
-            .frame(width: 200)
-            .labelsHidden()
+            
+            Spacer(minLength: 8)
+            
+            // View controls group
             HStack(spacing: 6) {
-                Button(action: { adjustFont(-1) }) {
-                    Text("−").font(.system(size: 14, weight: .bold))
+                Picker("View Style", selection: $renderModeRaw) {
+                    Text("Transcript").tag(TranscriptRenderMode.normal.rawValue)
+                    Text("Terminal").tag(TranscriptRenderMode.terminal.rawValue)
                 }
-                .accessibilityLabel("Make text smaller")
-                .help("Smaller (Cmd-)")
-                Button(action: { adjustFont(1) }) {
-                    Text("+").font(.system(size: 14, weight: .bold))
+                .pickerStyle(.segmented)
+                .frame(width: 140)
+                .labelsHidden()
+                
+                // Font size controls
+                HStack(spacing: 2) {
+                    Button(action: { adjustFont(-1) }) {
+                        Text("−").font(.system(size: 14, weight: .bold))
+                            .frame(width: 20, height: 20)
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel("Make text smaller")
+                    .help("Smaller (Cmd-)")
+                    
+                    Button(action: { adjustFont(1) }) {
+                        Text("+").font(.system(size: 14, weight: .bold))
+                            .frame(width: 20, height: 20)
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel("Make text bigger")
+                    .help("Bigger (Cmd+=)")
                 }
-                .accessibilityLabel("Make text bigger")
-                .help("Bigger (Cmd+=)")
+                
+                Button("Copy") { copyAll() }
+                    .buttonStyle(.borderless)
+                    .help("Copy entire transcript")
             }
-            Button("Copy") { copyAll() }
-                .help("Copy entire transcript")
         }
-        .padding(8)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .frame(height: 44)
     }
 
     private func syncPrefs() {

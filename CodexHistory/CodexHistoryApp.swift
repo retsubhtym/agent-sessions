@@ -61,9 +61,9 @@ private struct ContentView: View {
             if layoutMode == .vertical {
                 HSplitView {
                     SessionsListView(selection: $selection)
-                        .frame(minWidth: 400, idealWidth: 700, maxWidth: 1400)
+                        .frame(minWidth: 320, idealWidth: 600, maxWidth: 1200)
                     TranscriptPlainView(sessionID: selection)
-                        .frame(minWidth: 300)
+                        .frame(minWidth: 450)
                 }
             } else {
                 VSplitView {
