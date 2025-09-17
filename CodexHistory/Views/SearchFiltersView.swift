@@ -27,6 +27,31 @@ struct SearchFiltersView: View {
                     isSearchFocused = true
                 }
             }
+            
+            // Show active project filter with clear button
+            if let projectFilter = indexer.projectFilter, !projectFilter.isEmpty {
+                HStack(spacing: 4) {
+                    Image(systemName: "folder")
+                        .foregroundStyle(.secondary)
+                    Text(projectFilter)
+                        .font(.system(size: 12))
+                        .lineLimit(1)
+                    Button(action: {
+                        indexer.projectFilter = nil
+                        indexer.recomputeNow()
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Clear project filter")
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.blue.opacity(0.1))
+                .background(RoundedRectangle(cornerRadius: 6).stroke(Color.blue.opacity(0.3)))
+            }
+            
             Spacer(minLength: 0)
         }
     }
