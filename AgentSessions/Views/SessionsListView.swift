@@ -132,6 +132,18 @@ struct SessionsListView: View {
         .onChange(of: indexer.sessions) { _, _ in
             updateCachedRows()
         }
+        .onChange(of: selection) { _, newValue in
+            let desired: Set<String>
+            if let id = newValue {
+                desired = [id]
+            } else {
+                desired = []
+            }
+
+            if tableSelection != desired {
+                tableSelection = desired
+            }
+        }
         .onAppear {
             // Seed initial selection
             if let sel = selection { tableSelection = [sel] }

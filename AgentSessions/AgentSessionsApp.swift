@@ -103,6 +103,23 @@ private struct ContentView: View {
                 .help("Preferences")
             }
         }
+        .onChange(of: indexer.sessions) { _, sessions in
+            // Maintain a valid selection whenever new sessions arrive
+            guard !sessions.isEmpty else {
+                selection = nil
+                return
+            }
+
+            if let current = selection, sessions.contains(where: { $0.id == current }) {
+                return
+            }
+
+            selection = sessions.first?.id
+        }
+        .onChange(of: selection) { _, _ in
+            // Reset per-session context when switching selections
+            selectedEvent = nil
+        }
         // recomputeNow() is called inline in the toggle's setter
     }
 
