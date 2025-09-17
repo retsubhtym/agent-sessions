@@ -40,7 +40,7 @@ struct SessionsListView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .help(projectTooltip(for: s))
-                    .onTapGesture { if let name = s.repoName { indexer.projectFilter = name; indexer.recomputeNow() } }
+                    .onTapGesture(count: 2) { if let name = s.repoName { indexer.projectFilter = name; indexer.recomputeNow() } }
             }
             .width(min: indexer.showProjectColumn ? 120 : 0, ideal: indexer.showProjectColumn ? 160 : 0, max: indexer.showProjectColumn ? 240 : 0)
 
