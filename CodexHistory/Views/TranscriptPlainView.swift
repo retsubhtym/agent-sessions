@@ -359,18 +359,18 @@ private struct PlainTextScrollView: NSViewRepresentable {
                 }
             }
         }
-        // Assistant response colorization (subtle purple/gray)
+        // Assistant response colorization (subtle gray - less prominent)
         if !assistantRanges.isEmpty {
             let isDark = (tv.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
             let increaseContrast = NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast
-            let basePurple = NSColor.systemPurple
-            let purple: NSColor = {
-                if isDark || increaseContrast { return basePurple.withAlphaComponent(0.8) }
-                return basePurple.withAlphaComponent(0.7)
+            let baseGray = NSColor.secondaryLabelColor
+            let gray: NSColor = {
+                if isDark || increaseContrast { return baseGray }
+                return baseGray.withAlphaComponent(0.8)
             }()
             for r in assistantRanges {
                 if NSMaxRange(r) <= full.length {
-                    lm.addTemporaryAttribute(.foregroundColor, value: purple, forCharacterRange: r)
+                    lm.addTemporaryAttribute(.foregroundColor, value: gray, forCharacterRange: r)
                 }
             }
         }
