@@ -69,18 +69,17 @@ private struct ContentView: View {
     @EnvironmentObject var indexer: SessionIndexer
     @State private var selection: String?
     @State private var selectedEvent: String?
-    @State private var columnVisibility: NavigationSplitViewVisibility = .all
     let layoutMode: LayoutMode
     let onToggleLayout: () -> Void
 
     var body: some View {
         Group {
             if layoutMode == .vertical {
-                NavigationSplitView(columnVisibility: $columnVisibility) {
+                HSplitView {
                     SessionsListView(selection: $selection)
-                        .navigationSplitViewColumnWidth(min: 400, ideal: 700, max: 1400)
-                } detail: {
+                        .frame(minWidth: 400, idealWidth: 700, maxWidth: 1400)
                     TranscriptPlainView(sessionID: selection)
+                        .frame(minWidth: 300)
                 }
             } else {
                 VSplitView {
