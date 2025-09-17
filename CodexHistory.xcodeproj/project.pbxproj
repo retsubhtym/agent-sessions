@@ -46,6 +46,7 @@
 /* Begin PBXFileReference section */
 		B0000010DA0A000100000001 /* CodexHistory.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CodexHistory.app; sourceTree = BUILT_PRODUCTS_DIR; };
         B00000110A0A000100000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+        B00000140A0A000100000001 /* CodexHistory.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CodexHistory.entitlements; sourceTree = "<group>"; };
         B00000111A0A000100000001 /* CodexHistoryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexHistoryApp.swift; sourceTree = "<group>"; };
         B00000112A0A000100000001 /* CodexHistoryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CodexHistoryApp.swift; path = CodexHistory/CodexHistoryApp.swift; sourceTree = SOURCE_ROOT; };
         B00000113A0A000100000001 /* Session.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Session.swift; path = CodexHistory/Model/Session.swift; sourceTree = SOURCE_ROOT; };
@@ -100,6 +101,7 @@
             isa = PBXGroup;
             children = (
                 B00000110A0A000100000001 /* Info.plist */,
+                B00000140A0A000100000001 /* CodexHistory.entitlements */,
                 B0000011DA0A000100000001 /* Assets.xcassets */,
                 B0000012AA0A000100000001 /* Model */,
                 B0000012BA0A000100000001 /* Services */,
@@ -218,6 +220,7 @@
             buildSettings = {
                 CLANG_ENABLE_MODULES = YES;
                 CODE_SIGNING_ALLOWED = YES;
+                CODE_SIGN_ENTITLEMENTS = CodexHistory/CodexHistory.entitlements;
                 CODE_SIGN_STYLE = Automatic;
                 CURRENT_PROJECT_VERSION = 1;
                 GENERATE_INFOPLIST_FILE = YES;
@@ -244,6 +247,7 @@
             buildSettings = {
                 CLANG_ENABLE_MODULES = YES;
                 CODE_SIGNING_ALLOWED = YES;
+                CODE_SIGN_ENTITLEMENTS = CodexHistory/CodexHistory.entitlements;
                 CODE_SIGN_STYLE = Automatic;
                 CURRENT_PROJECT_VERSION = 1;
                 GENERATE_INFOPLIST_FILE = YES;

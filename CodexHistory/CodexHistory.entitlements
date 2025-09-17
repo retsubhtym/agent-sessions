@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- No app sandbox - this is a developer tool that needs full file system access -->
+    <!-- CodexHistory reads from ~/.codex/sessions or CODEX_HOME/sessions -->
+    <!-- Users may have sessions in various locations that need to be accessible -->
+</dict>
+</plist>
