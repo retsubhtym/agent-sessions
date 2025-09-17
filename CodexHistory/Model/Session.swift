@@ -15,21 +15,28 @@ public struct Session: Identifiable, Equatable, Codable {
     }
 
     // Derived human-friendly title for the session row.
-    // Rule: first non-empty user line (trimmed and whitespace-collapsed);
-    // if none, first assistant line; else first tool call name; else "No prompt".
+    // Use improved Codex-style filtering with fallbacks for robustness
     public var title: String {
-        // 1) First non-empty user line
+        // 1) Use Codex-style filtered title (best quality)
+        if let codexTitle = codexPreviewTitle {
+            return codexTitle
+        }
+        
+        // 2) Fallback: first non-empty user line (less filtering)
         if let t = events.first(where: { $0.kind == .user })?.text?.collapsedWhitespace(), !t.isEmpty {
             return t
         }
-        // 2) First non-empty assistant line
+        
+        // 3) Fallback: first non-empty assistant line
         if let t = events.first(where: { $0.kind == .assistant })?.text?.collapsedWhitespace(), !t.isEmpty {
             return t
         }
-        // 3) First tool call name
+        
+        // 4) Final fallback: first tool call name
         if let name = events.first(where: { $0.kind == .tool_call && ($0.toolName?.isEmpty == false) })?.toolName {
             return name
         }
+        
         return "No prompt"
     }
 
@@ -38,10 +45,40 @@ public struct Session: Identifiable, Equatable, Codable {
     // head of the file (first 10 records). If none found, the session is not shown.
     public var codexPreviewTitle: String? {
         let head = events.prefix(10)
-        // Prefer first plain user message
-        if let t = head.first(where: { $0.kind == .user && !($0.text?.trimmedEmpty ?? true) })?.text?.collapsedWhitespace() {
-            return t
+        
+        // Find first meaningful user message, filtering out IDE scaffolding
+        for event in head where event.kind == .user {
+            guard let text = event.text?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else { continue }
+            
+            // Filter out common IDE scaffolding patterns
+            let lowerText = text.lowercased()
+            let scaffoldingPatterns = [
+                "you are an expert",
+                "you are a helpful",
+                "act as a",
+                "your role is",
+                "system:",
+                "assistant:",
+                "<instructions>",
+                "# instructions",
+                "## instructions",
+                "please follow",
+                "make sure to"
+            ]
+            
+            // Skip if it looks like scaffolding
+            if scaffoldingPatterns.contains(where: { lowerText.hasPrefix($0) }) {
+                continue
+            }
+            
+            // Skip if it's very long (likely instructions)
+            if text.count > 200 {
+                continue
+            }
+            
+            return text.collapsedWhitespace()
         }
+        
         // Fallback: first shell/tool command in head as a one-liner
         if let call = head.first(where: { $0.kind == .tool_call && ($0.toolName?.lowercased().contains("shell") == true || $0.toolName?.lowercased().contains("bash") == true || $0.toolName?.lowercased().contains("sh") == true) }) {
             if let cmd = Self.firstCommandLine(from: call.toolInput) { return cmd }
@@ -136,7 +173,10 @@ public struct Session: Identifiable, Equatable, Codable {
         return r.localizedString(for: ref, relativeTo: Date())
     }
 
-    public var modifiedAt: Date { endTime ?? startTime ?? .distantPast }
+    public var modifiedAt: Date { 
+        // Use filename timestamp (session creation) like Codex CLI, fallback to session end/start
+        codexFilenameTimestamp ?? endTime ?? startTime ?? .distantPast 
+    }
 
     // Best-effort git branch detection
     public var gitBranch: String? {
