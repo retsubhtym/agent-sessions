@@ -8,7 +8,24 @@ struct SessionsListView: View {
     // Table sort order uses comparators
     @State private var sortOrder: [KeyPathComparator<Session>] = []
 
-    private var rows: [Session] { indexer.sessions.sorted(using: sortOrder) }
+    private var rows: [Session] { 
+        let sorted = indexer.sessions.sorted(using: sortOrder)
+        
+        // Debug: Log what the UI is displaying
+        if !sorted.isEmpty {
+            print("🖥️ [DEBUG] SessionsListView rows (first 3):")
+            for (idx, session) in sorted.prefix(3).enumerated() {
+                let filename = (session.filePath as NSString).lastPathComponent
+                let formatter = DateFormatter()
+                formatter.dateStyle = .short
+                formatter.timeStyle = .medium
+                formatter.timeZone = TimeZone.current
+                print("  \(idx + 1). \(filename) -> modifiedAt: \(formatter.string(from: session.modifiedAt)), relative: \(session.modifiedRelative)")
+            }
+        }
+        
+        return sorted
+    }
 
     var body: some View {
         Table(rows, selection: $tableSelection, sortOrder: $sortOrder) {

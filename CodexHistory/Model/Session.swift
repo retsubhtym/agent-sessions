@@ -89,9 +89,15 @@ public struct Session: Identifiable, Equatable, Codable {
     // Extract timestamp and UUID from rollout filename for Codex sort order.
     // rollout-YYYY-MM-DDThh-mm-ss-<uuid>.jsonl
     public var codexFilenameTimestamp: Date? {
-        guard let match = Self.rolloutRegex.firstMatch(in: (filePath as NSString).lastPathComponent) else { return nil }
+        let filename = (filePath as NSString).lastPathComponent
+        
+        guard let match = Self.rolloutRegex.firstMatch(in: filename) else { 
+            return nil 
+        }
+        
         let ts = match.ts
-        return Self.rolloutDateFormatter.date(from: ts)
+        let formatter = Self.rolloutDateFormatter
+        return formatter.date(from: ts)
     }
 
     public var codexFilenameUUID: String? {
@@ -167,7 +173,8 @@ public struct Session: Identifiable, Equatable, Codable {
     public var nonMetaCount: Int { events.filter { $0.kind != .meta }.count }
 
     public var modifiedRelative: String {
-        let ref = endTime ?? startTime ?? Date()
+        // Use modifiedAt which correctly uses filename timestamp
+        let ref = modifiedAt
         let r = RelativeDateTimeFormatter()
         r.unitsStyle = .short
         return r.localizedString(for: ref, relativeTo: Date())
@@ -175,7 +182,19 @@ public struct Session: Identifiable, Equatable, Codable {
 
     public var modifiedAt: Date { 
         // Use filename timestamp (session creation) like Codex CLI, fallback to session end/start
-        codexFilenameTimestamp ?? endTime ?? startTime ?? .distantPast 
+        let filenameDate = codexFilenameTimestamp
+        let endDate = endTime
+        let startDate = startTime
+        
+        if let filenameDate = filenameDate {
+            return filenameDate
+        } else if let endDate = endDate {
+            return endDate
+        } else if let startDate = startDate {
+            return startDate
+        } else {
+            return .distantPast
+        }
     }
 
     // Best-effort git branch detection
@@ -261,8 +280,8 @@ enum FilterEngine {
     }
 
     static func filterSessions(_ sessions: [Session], filters: Filters) -> [Session] {
+        // Preserve the original sort order from allSessions instead of re-sorting
         sessions.filter { sessionMatches($0, filters: filters) }
-            .sorted { ($0.startTime ?? .distantPast) > ($1.startTime ?? .distantPast) }
     }
 
     private struct ParsedQuery { let freeText: String; let repo: String?; let path: String? }
@@ -391,6 +410,7 @@ private extension Session {
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "yyyy-MM-dd'T'HH-mm-ss"
         f.timeZone = TimeZone.current  // Use local timezone, not UTC
+        print("🕐 [DEBUG] DateFormatter timezone: \(f.timeZone?.identifier ?? "nil")")
         return f
     }()
     static func firstCommandLine(from raw: String?) -> String? {

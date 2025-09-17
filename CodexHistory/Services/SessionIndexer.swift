@@ -95,9 +95,34 @@ final class SessionIndexer: ObservableObject {
                 let (q, from, to, model) = input
                 let filters = Filters(query: q, dateFrom: from, dateTo: to, model: model, kinds: kinds, repoName: self?.projectFilter, pathContains: nil)
                 var results = FilterEngine.filterSessions(all, filters: filters)
+                
+                // Debug: Log sessions being filtered out
+                let beforeFilter = results.count
                 if self?.hideZeroMessageSessionsPref ?? true {
+                    let zeroMsgSessions = results.filter { $0.nonMetaCount == 0 }
+                    if !zeroMsgSessions.isEmpty {
+                        print("⚠️ [DEBUG] Filtering out \(zeroMsgSessions.count) sessions with zero messages:")
+                        for session in zeroMsgSessions.prefix(3) {
+                            let filename = (session.filePath as NSString).lastPathComponent
+                            print("  - \(filename) (nonMetaCount: \(session.nonMetaCount))")
+                        }
+                    }
                     results = results.filter { $0.nonMetaCount > 0 }
                 }
+                let afterFilter = results.count
+                print("📊 [DEBUG] Sessions: \(beforeFilter) -> \(afterFilter) after zero-message filter")
+                
+                // Debug: Log the first 3 filtered sessions
+                print("🔍 [DEBUG] Filtered sessions (first 3):")
+                for (idx, session) in results.prefix(3).enumerated() {
+                    let filename = (session.filePath as NSString).lastPathComponent
+                    let formatter = DateFormatter()
+                    formatter.dateStyle = .short
+                    formatter.timeStyle = .medium
+                    formatter.timeZone = TimeZone.current
+                    print("  \(idx + 1). \(filename) -> modifiedAt: \(formatter.string(from: session.modifiedAt)), nonMetaCount: \(session.nonMetaCount)")
+                }
+                
                 return results
             }
             .receive(on: DispatchQueue.main)
@@ -132,6 +157,7 @@ final class SessionIndexer: ObservableObject {
         let filters = Filters(query: query, dateFrom: dateFrom, dateTo: dateTo, model: selectedModel, kinds: selectedKinds, repoName: projectFilter, pathContains: nil)
         var results = FilterEngine.filterSessions(allSessions, filters: filters)
         if hideZeroMessageSessionsPref { results = results.filter { $0.nonMetaCount > 0 } }
+        // FilterEngine now preserves order, so filtered results maintain allSessions sort order
         DispatchQueue.main.async { self.sessions = results }
     }
 
@@ -185,7 +211,20 @@ final class SessionIndexer: ObservableObject {
                 DispatchQueue.main.async {
                     self.filesProcessed = i + 1
                     self.progressText = "Indexed \(i + 1)/\(sortedFiles.count)"
-                    self.allSessions = sessions.sorted { ($0.startTime ?? .distantPast) > ($1.startTime ?? .distantPast) }
+                    self.allSessions = sessions.sorted { $0.modifiedAt > $1.modifiedAt }
+                    
+                    // Debug: Log first 3 sessions from allSessions after final sort
+                    if i == sortedFiles.count - 1 {
+                        print("📊 [DEBUG] allSessions after indexing (first 3):")
+                        for (idx, session) in self.allSessions.prefix(3).enumerated() {
+                            let filename = (session.filePath as NSString).lastPathComponent
+                            let formatter = DateFormatter()
+                            formatter.dateStyle = .short
+                            formatter.timeStyle = .medium
+                            formatter.timeZone = TimeZone.current
+                            print("  \(idx + 1). \(filename) -> modifiedAt: \(formatter.string(from: session.modifiedAt))")
+                        }
+                    }
                 }
             }
 
@@ -254,29 +293,43 @@ final class SessionIndexer: ObservableObject {
                 if let v = obj[key] { timestamp = timestamp ?? Self.decodeDate(from: v) }
             }
 
-            // role / type
-            if let r = obj["role"] as? String { role = r }
-            if let t = obj["type"] as? String { type = t }
-            if type == nil, let e = obj["event"] as? String { type = e }
+            // Check for nested payload structure (Codex format)
+            var workingObj = obj
+            if let payload = obj["payload"] as? [String: Any] {
+                // Merge payload fields into working object
+                workingObj = payload
+                // Also check payload for timestamp if not found at top level
+                if timestamp == nil {
+                    for key in tsKeys {
+                        if let v = payload[key] { timestamp = timestamp ?? Self.decodeDate(from: v) }
+                    }
+                }
+            }
+            
+            // role / type (now checking in payload if present)
+            if let r = workingObj["role"] as? String { role = r }
+            if let t = workingObj["type"] as? String { type = t }
+            if type == nil, let e = workingObj["event"] as? String { type = e }
 
-            // model
+            // model (check both top-level and payload)
             if let m = obj["model"] as? String { model = m }
+            if model == nil, let m = workingObj["model"] as? String { model = m }
 
             // delta / chunk identifiers
-            if let mid = obj["message_id"] as? String { messageID = mid }
-            if let pid = obj["parent_id"] as? String { parentID = pid }
-            if let idFromObj = obj["id"] as? String, messageID == nil { messageID = idFromObj }
-            if let d = obj["delta"] as? Bool { isDelta = isDelta || d }
-            if obj["delta"] is [String: Any] { isDelta = true }
-            if obj["chunk"] != nil { isDelta = true }
-            if obj["delta_index"] != nil { isDelta = true }
+            if let mid = workingObj["message_id"] as? String { messageID = mid }
+            if let pid = workingObj["parent_id"] as? String { parentID = pid }
+            if let idFromObj = workingObj["id"] as? String, messageID == nil { messageID = idFromObj }
+            if let d = workingObj["delta"] as? Bool { isDelta = isDelta || d }
+            if workingObj["delta"] is [String: Any] { isDelta = true }
+            if workingObj["chunk"] != nil { isDelta = true }
+            if workingObj["delta_index"] != nil { isDelta = true }
 
             // text content variants
-            if let content = obj["content"] as? String { text = content }
-            if text == nil, let txt = obj["text"] as? String { text = txt }
-            if text == nil, let msg = obj["message"] as? String { text = msg }
+            if let content = workingObj["content"] as? String { text = content }
+            if text == nil, let txt = workingObj["text"] as? String { text = txt }
+            if text == nil, let msg = workingObj["message"] as? String { text = msg }
             // Assistant content arrays: concatenate text parts
-            if text == nil, let arr = obj["content"] as? [Any] {
+            if text == nil, let arr = workingObj["content"] as? [Any] {
                 var pieces: [String] = []
                 for el in arr {
                     if let d = el as? [String: Any] {
@@ -293,29 +346,29 @@ final class SessionIndexer: ObservableObject {
             if let t = text, t.contains("<environment_context>") { type = "environment_context" }
 
             // tool fields
-            if let t = obj["tool"] as? String { toolName = t }
-            if toolName == nil, let name = obj["name"] as? String { toolName = name }
-            if toolName == nil, let fn = (obj["function"] as? [String: Any])?["name"] as? String { toolName = fn }
+            if let t = workingObj["tool"] as? String { toolName = t }
+            if toolName == nil, let name = workingObj["name"] as? String { toolName = name }
+            if toolName == nil, let fn = (workingObj["function"] as? [String: Any])?["name"] as? String { toolName = fn }
 
-            if let input = obj["input"] as? String { toolInput = input }
-            if toolInput == nil, let args = obj["arguments"] as? String { toolInput = args }
+            if let input = workingObj["input"] as? String { toolInput = input }
+            if toolInput == nil, let args = workingObj["arguments"] as? String { toolInput = args }
             // Arguments may be non-string; minify to single-line JSON
-            if toolInput == nil, let argsObj = obj["arguments"] {
+            if toolInput == nil, let argsObj = workingObj["arguments"] {
                 if let s = Self.stringifyJSON(argsObj, pretty: false) { toolInput = s }
             }
 
             // Outputs: stdout, stderr, result, output (in this stable order)
             var outputs: [String] = []
-            if let stdout = obj["stdout"] { outputs.append(Self.stringifyJSON(stdout, pretty: true) ?? String(describing: stdout)) }
-            if let stderr = obj["stderr"] { outputs.append(Self.stringifyJSON(stderr, pretty: true) ?? String(describing: stderr)) }
-            if let result = obj["result"] { outputs.append(Self.stringifyJSON(result, pretty: true) ?? String(describing: result)) }
-            if let output = obj["output"] { outputs.append(Self.stringifyJSON(output, pretty: true) ?? String(describing: output)) }
+            if let stdout = workingObj["stdout"] { outputs.append(Self.stringifyJSON(stdout, pretty: true) ?? String(describing: stdout)) }
+            if let stderr = workingObj["stderr"] { outputs.append(Self.stringifyJSON(stderr, pretty: true) ?? String(describing: stderr)) }
+            if let result = workingObj["result"] { outputs.append(Self.stringifyJSON(result, pretty: true) ?? String(describing: result)) }
+            if let output = workingObj["output"] { outputs.append(Self.stringifyJSON(output, pretty: true) ?? String(describing: output)) }
             if !outputs.isEmpty {
                 toolOutput = outputs.joined(separator: "\n")
             }
             // Back-compat if values above were strings only
-            if toolOutput == nil, let out = obj["output"] as? String { toolOutput = out }
-            if toolOutput == nil, let res = obj["result"] as? String { toolOutput = res }
+            if toolOutput == nil, let out = workingObj["output"] as? String { toolOutput = out }
+            if toolOutput == nil, let res = workingObj["result"] as? String { toolOutput = res }
         }
 
         let kind = SessionEventKind.from(role: role, type: type)
