@@ -65,7 +65,7 @@ struct SessionsListView: View {
         .environment(\.defaultMinListRowHeight, 22)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
-        .navigationTitle("Sessions")
+        .navigationTitle("Codex CLI Sessions")
         .overlay {
             // Error states as overlay to preserve layout structure for split views
             if let error = indexer.indexingError {

@@ -12,7 +12,7 @@ struct CodexHistoryApp: App {
     @State private var showingFirstRunPrompt: Bool = false
 
     var body: some Scene {
-        WindowGroup("CodexHistory") {
+        WindowGroup("Agent History") {
             ContentView(layoutMode: LayoutMode(rawValue: layoutModeRaw) ?? .vertical,
                         onToggleLayout: {
                             let current = LayoutMode(rawValue: layoutModeRaw) ?? .vertical
