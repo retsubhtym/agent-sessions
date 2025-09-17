@@ -12,16 +12,17 @@ struct SessionsListView: View {
 
     var body: some View {
         Table(rows, selection: $tableSelection, sortOrder: $sortOrder) {
-            // ID (always present; hide via zero width)
-            TableColumn("ID", value: \Session.shortID) { s in
-                Text(s.shortID)
-                    .font(.system(size: 13, weight: .bold, design: .monospaced))
-                    .foregroundStyle(.secondary)
+            // Session (first column)
+            TableColumn("Session", value: \Session.title) { s in
+                Text(s.codexDisplayTitle)
+                    .font(.system(size: 13))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
-            .width(min: indexer.showIDColumn ? 64 : 0, ideal: indexer.showIDColumn ? 64 : 0, max: indexer.showIDColumn ? 64 : 0)
+            .width(min: indexer.showTitleColumn ? 160 : 0, ideal: indexer.showTitleColumn ? 320 : 0, max: indexer.showTitleColumn ? 2000 : 0)
 
-            // Modified
-            TableColumn("Modified", value: \Session.modifiedAt) { s in
+            // Date (renamed from Modified)
+            TableColumn("Date", value: \Session.modifiedAt) { s in
                 let display = indexer.modifiedDisplay
                 let primary = (display == .relative) ? s.modifiedRelative : absoluteTime(s.modifiedAt)
                 let helpText = (display == .relative) ? absoluteTime(s.modifiedAt) : s.modifiedRelative
@@ -32,14 +33,7 @@ struct SessionsListView: View {
             }
             .width(min: indexer.showModifiedColumn ? 120 : 0, ideal: indexer.showModifiedColumn ? 120 : 0, max: indexer.showModifiedColumn ? 140 : 0)
 
-            // Msgs
-            TableColumn("Msgs", value: \Session.nonMetaCount) { s in
-                Text(String(format: "%3d", s.nonMetaCount))
-                    .font(.system(size: 13, weight: .regular, design: .monospaced))
-            }
-            .width(min: indexer.showMsgsColumn ? 64 : 0, ideal: indexer.showMsgsColumn ? 64 : 0, max: indexer.showMsgsColumn ? 80 : 0)
-
-            // Project (fixed position to avoid TableColumnContent availability issues)
+            // Project
             TableColumn("Project", value: \Session.repoDisplay) { s in
                 Text(s.repoDisplay)
                     .font(.system(size: 13))
@@ -50,14 +44,20 @@ struct SessionsListView: View {
             }
             .width(min: indexer.showProjectColumn ? 120 : 0, ideal: indexer.showProjectColumn ? 160 : 0, max: indexer.showProjectColumn ? 240 : 0)
 
-            // Session
-            TableColumn("Session", value: \Session.title) { s in
-                Text(s.codexDisplayTitle)
-                    .font(.system(size: 13))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+            // Msgs
+            TableColumn("Msgs", value: \Session.nonMetaCount) { s in
+                Text(String(format: "%3d", s.nonMetaCount))
+                    .font(.system(size: 13, weight: .regular, design: .monospaced))
             }
-            .width(min: indexer.showTitleColumn ? 160 : 0, ideal: indexer.showTitleColumn ? 320 : 0, max: indexer.showTitleColumn ? 2000 : 0)
+            .width(min: indexer.showMsgsColumn ? 64 : 0, ideal: indexer.showMsgsColumn ? 64 : 0, max: indexer.showMsgsColumn ? 80 : 0)
+
+            // ID (last column; hide via zero width)
+            TableColumn("ID", value: \Session.shortID) { s in
+                Text(s.shortID)
+                    .font(.system(size: 13, weight: .bold, design: .monospaced))
+                    .foregroundStyle(.secondary)
+            }
+            .width(min: indexer.showIDColumn ? 64 : 0, ideal: indexer.showIDColumn ? 64 : 0, max: indexer.showIDColumn ? 64 : 0)
         }
         .tableStyle(.inset(alternatesRowBackgrounds: true))
         .environment(\.defaultMinListRowHeight, 22)
