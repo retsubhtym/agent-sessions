@@ -78,6 +78,7 @@ private struct ContentView: View {
             if layoutMode == .vertical {
                 NavigationSplitView(columnVisibility: $columnVisibility) {
                     SessionsListView(selection: $selection)
+                        .navigationSplitViewColumnWidth(min: 600, ideal: 800, max: 1200)
                 } detail: {
                     TranscriptPlainView(sessionID: selection)
                 }
