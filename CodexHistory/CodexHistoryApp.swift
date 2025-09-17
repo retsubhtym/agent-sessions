@@ -40,14 +40,6 @@ struct CodexHistoryApp: App {
                 Button("Find in Transcript") { indexer.requestTranscriptFindFocus.toggle() }
                     .keyboardShortcut("f", modifiers: .command)
             }
-            CommandMenu("Text Size") {
-                Button("Make Text Bigger") { adjustFont(delta: 1) }
-                    .keyboardShortcut("=", modifiers: .command)
-                Button("Make Text Smaller") { adjustFont(delta: -1) }
-                    .keyboardShortcut("-", modifiers: .command)
-                Button("Reset Text Size") { resetFont() }
-                    .keyboardShortcut("0", modifiers: .command)
-            }
             CommandGroup(replacing: .appSettings) {
                 Button("Settings…") { PreferencesWindowController.shared.show(indexer: indexer) }
                     .keyboardShortcut(",", modifiers: .command)
@@ -56,14 +48,6 @@ struct CodexHistoryApp: App {
     }
 }
 
-// MARK: - Font size helpers
-extension CodexHistoryApp {
-    private func adjustFont(delta: Double) {
-        let newSize = max(9, min(30, transcriptFontSize + delta))
-        transcriptFontSize = newSize
-    }
-    private func resetFont() { transcriptFontSize = 13 }
-}
 
 private struct ContentView: View {
     @EnvironmentObject var indexer: SessionIndexer

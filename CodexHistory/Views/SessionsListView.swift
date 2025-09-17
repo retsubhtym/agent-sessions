@@ -8,24 +8,9 @@ struct SessionsListView: View {
     // Table sort order uses comparators
     @State private var sortOrder: [KeyPathComparator<Session>] = []
 
-    private var rows: [Session] { 
-        let sorted = indexer.sessions.sorted(using: sortOrder)
-        
-        // Debug: Log what the UI is displaying
-        if !sorted.isEmpty {
-            print("🖥️ [DEBUG] SessionsListView rows (first 3):")
-            for (idx, session) in sorted.prefix(3).enumerated() {
-                let filename = (session.filePath as NSString).lastPathComponent
-                let formatter = DateFormatter()
-                formatter.dateStyle = .short
-                formatter.timeStyle = .medium
-                formatter.timeZone = TimeZone.current
-                print("  \(idx + 1). \(filename) -> modifiedAt: \(formatter.string(from: session.modifiedAt)), relative: \(session.modifiedRelative)")
-            }
-        }
-        
-        return sorted
-    }
+    @State private var cachedRows: [Session] = []
+    
+    private var rows: [Session] { cachedRows }
 
     var body: some View {
         Table(rows, selection: $tableSelection, sortOrder: $sortOrder) {
@@ -57,7 +42,7 @@ struct SessionsListView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .help(projectTooltip(for: s))
-                    .onTapGesture(count: 2) { if let name = s.repoName { indexer.projectFilter = name; indexer.recomputeNow() } }
+                    .onTapGesture { if let name = s.repoName { indexer.projectFilter = name; indexer.recomputeNow() } }
             }
             .width(min: indexer.showProjectColumn ? 120 : 0, ideal: indexer.showProjectColumn ? 160 : 0, max: indexer.showProjectColumn ? 240 : 0)
 
@@ -81,6 +66,52 @@ struct SessionsListView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipped()
         .navigationTitle("Sessions")
+        .overlay {
+            // Error states as overlay to preserve layout structure for split views
+            if let error = indexer.indexingError {
+                ContentUnavailableView {
+                    Label("Indexing Error", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(error)
+                } actions: {
+                    Button("Retry") {
+                        indexer.refresh()
+                    }
+                    Button("Choose Different Directory") {
+                        indexer.sessionsRootOverride = ""
+                        indexer.refresh()
+                    }
+                }
+            } else if indexer.hasEmptyDirectory && !indexer.isIndexing {
+                ContentUnavailableView {
+                    Label("No Sessions Found", systemImage: "folder")
+                } description: {
+                    Text("No Codex session files found in \(indexer.sessionsRoot().path)")
+                    Text("Session files are named 'rollout-*.jsonl'")
+                } actions: {
+                    Button("Refresh") {
+                        indexer.refresh()
+                    }
+                    Button("Choose Different Directory") {
+                        indexer.sessionsRootOverride = ""
+                        indexer.refresh()
+                    }
+                }
+            } else if rows.isEmpty && !indexer.isIndexing {
+                ContentUnavailableView {
+                    Label("No Sessions Match Filters", systemImage: "line.3.horizontal.decrease.circle")
+                } description: {
+                    Text("Try adjusting your search or filter settings")
+                } actions: {
+                    Button("Clear Filters") {
+                        indexer.query = ""
+                        indexer.projectFilter = nil
+                        indexer.dateFrom = nil
+                        indexer.dateTo = nil
+                    }
+                }
+            }
+        }
         // No Codex matching mode for now; always show Codex-style titles, full list
         .onChange(of: sortOrder) { _, newValue in
             if let first = newValue.first {
@@ -92,10 +123,14 @@ struct SessionsListView: View {
                 else { key = .title }
                 indexer.sortDescriptor = .init(key: key, ascending: first.order == .forward)
             }
+            updateCachedRows()
         }
         .onChange(of: tableSelection) { _, newSel in
             // Bridge to single selection binding
             selection = newSel.first
+        }
+        .onChange(of: indexer.sessions) { _, _ in
+            updateCachedRows()
         }
         .onAppear {
             // Seed initial selection
@@ -103,9 +138,14 @@ struct SessionsListView: View {
             if sortOrder.isEmpty {
                 sortOrder = [ KeyPathComparator(\Session.modifiedAt, order: .reverse) ]
             }
+            updateCachedRows()
         }
     }
 
+    private func updateCachedRows() {
+        cachedRows = indexer.sessions.sorted(using: sortOrder)
+    }
+    
     private func reveal(_ session: Session) {
         NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: session.filePath)])
     }

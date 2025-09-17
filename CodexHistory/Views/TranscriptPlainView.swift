@@ -189,6 +189,8 @@ struct TranscriptPlainView: View {
             highlightRanges = []
             return
         }
+        
+        // First search in the rendered transcript
         let lowerText = transcript.lowercased()
         let lowerQ = q.lowercased()
         var matches: [Range<String.Index>] = []
@@ -199,6 +201,34 @@ struct TranscriptPlainView: View {
             matches.append(origStart..<origEnd)
             searchStart = r.upperBound
         }
+        
+        // If no matches in transcript, check if the term exists in raw session data
+        // to provide feedback consistent with global search
+        if matches.isEmpty, let session = currentSession {
+            let hasMatchInRawData = session.events.contains { e in
+                if let t = e.text, t.localizedCaseInsensitiveContains(q) { return true }
+                if let ti = e.toolInput, ti.localizedCaseInsensitiveContains(q) { return true }
+                if let to = e.toolOutput, to.localizedCaseInsensitiveContains(q) { return true }
+                if e.rawJSON.localizedCaseInsensitiveContains(q) { return true }
+                return false
+            }
+            
+            // If found in raw data but not in transcript, show a helpful message
+            if hasMatchInRawData {
+                // Insert a note in the transcript about hidden matches
+                let noteText = "\n[Note: '\(q)' found in raw session data but not in rendered transcript. Use Raw JSON view to see all content.]\n"
+                transcript += noteText
+                
+                // Find the note in the updated transcript
+                let updatedLowerText = transcript.lowercased()
+                if let noteRange = updatedLowerText.range(of: "note:") {
+                    let origStart = transcript.index(transcript.startIndex, offsetBy: updatedLowerText.distance(from: updatedLowerText.startIndex, to: noteRange.lowerBound))
+                    let origEnd = transcript.index(origStart, offsetBy: noteText.count - 2) // Exclude newlines
+                    matches.append(origStart..<origEnd)
+                }
+            }
+        }
+        
         findMatches = matches
         // Build NSRanges for temporary highlight attributes
         var nsRanges: [NSRange] = []

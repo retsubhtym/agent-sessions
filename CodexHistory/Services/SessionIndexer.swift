@@ -13,6 +13,10 @@ final class SessionIndexer: ObservableObject {
     @Published var progressText: String = ""
     @Published var filesProcessed: Int = 0
     @Published var totalFiles: Int = 0
+    
+    // Error states
+    @Published var indexingError: String? = nil
+    @Published var hasEmptyDirectory: Bool = false
 
     // Filters
     @Published var query: String = ""
@@ -96,31 +100,8 @@ final class SessionIndexer: ObservableObject {
                 let filters = Filters(query: q, dateFrom: from, dateTo: to, model: model, kinds: kinds, repoName: self?.projectFilter, pathContains: nil)
                 var results = FilterEngine.filterSessions(all, filters: filters)
                 
-                // Debug: Log sessions being filtered out
-                let beforeFilter = results.count
                 if self?.hideZeroMessageSessionsPref ?? true {
-                    let zeroMsgSessions = results.filter { $0.nonMetaCount == 0 }
-                    if !zeroMsgSessions.isEmpty {
-                        print("⚠️ [DEBUG] Filtering out \(zeroMsgSessions.count) sessions with zero messages:")
-                        for session in zeroMsgSessions.prefix(3) {
-                            let filename = (session.filePath as NSString).lastPathComponent
-                            print("  - \(filename) (nonMetaCount: \(session.nonMetaCount))")
-                        }
-                    }
                     results = results.filter { $0.nonMetaCount > 0 }
-                }
-                let afterFilter = results.count
-                print("📊 [DEBUG] Sessions: \(beforeFilter) -> \(afterFilter) after zero-message filter")
-                
-                // Debug: Log the first 3 filtered sessions
-                print("🔍 [DEBUG] Filtered sessions (first 3):")
-                for (idx, session) in results.prefix(3).enumerated() {
-                    let filename = (session.filePath as NSString).lastPathComponent
-                    let formatter = DateFormatter()
-                    formatter.dateStyle = .short
-                    formatter.timeStyle = .medium
-                    formatter.timeZone = TimeZone.current
-                    print("  \(idx + 1). \(filename) -> modifiedAt: \(formatter.string(from: session.modifiedAt)), nonMetaCount: \(session.nonMetaCount)")
                 }
                 
                 return results
@@ -185,9 +166,22 @@ final class SessionIndexer: ObservableObject {
         progressText = "Scanning…"
         filesProcessed = 0
         totalFiles = 0
+        indexingError = nil
+        hasEmptyDirectory = false
 
         let fm = FileManager.default
         DispatchQueue.global(qos: .userInitiated).async {
+            // Check if directory exists and is accessible
+            var isDir: ObjCBool = false
+            guard fm.fileExists(atPath: root.path, isDirectory: &isDir), isDir.boolValue else {
+                DispatchQueue.main.async {
+                    self.isIndexing = false
+                    self.indexingError = "Sessions directory not found: \(root.path)"
+                    self.progressText = "Error"
+                }
+                return
+            }
+            
             var found: [URL] = []
             if let en = fm.enumerator(at: root, includingPropertiesForKeys: [.isRegularFileKey], options: [.skipsHiddenFiles]) {
                 for case let url as URL in en {
@@ -196,9 +190,11 @@ final class SessionIndexer: ObservableObject {
                     }
                 }
             }
+            
             let sortedFiles = found.sorted { ($0.lastPathComponent) > ($1.lastPathComponent) }
             DispatchQueue.main.async {
                 self.totalFiles = sortedFiles.count
+                self.hasEmptyDirectory = sortedFiles.isEmpty
             }
 
             var sessions: [Session] = []
@@ -213,18 +209,6 @@ final class SessionIndexer: ObservableObject {
                     self.progressText = "Indexed \(i + 1)/\(sortedFiles.count)"
                     self.allSessions = sessions.sorted { $0.modifiedAt > $1.modifiedAt }
                     
-                    // Debug: Log first 3 sessions from allSessions after final sort
-                    if i == sortedFiles.count - 1 {
-                        print("📊 [DEBUG] allSessions after indexing (first 3):")
-                        for (idx, session) in self.allSessions.prefix(3).enumerated() {
-                            let filename = (session.filePath as NSString).lastPathComponent
-                            let formatter = DateFormatter()
-                            formatter.dateStyle = .short
-                            formatter.timeStyle = .medium
-                            formatter.timeZone = TimeZone.current
-                            print("  \(idx + 1). \(filename) -> modifiedAt: \(formatter.string(from: session.modifiedAt))")
-                        }
-                    }
                 }
             }
 

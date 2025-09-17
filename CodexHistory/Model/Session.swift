@@ -268,13 +268,12 @@ enum FilterEngine {
 
         let q = parsed.freeText.trimmingCharacters(in: .whitespacesAndNewlines)
         if q.isEmpty { return true }
-        let lower = q.lowercased()
-        // Full-text across event text/tool fields
+        // Full-text across event text/tool fields - optimize by checking most likely fields first
         for e in session.events {
-            if let t = e.text?.lowercased(), t.contains(lower) { return true }
-            if let ti = e.toolInput?.lowercased(), ti.contains(lower) { return true }
-            if let to = e.toolOutput?.lowercased(), to.contains(lower) { return true }
-            if e.rawJSON.lowercased().contains(lower) { return true }
+            if let t = e.text, !t.isEmpty, t.localizedCaseInsensitiveContains(q) { return true }
+            if let ti = e.toolInput, !ti.isEmpty, ti.localizedCaseInsensitiveContains(q) { return true }
+            if let to = e.toolOutput, !to.isEmpty, to.localizedCaseInsensitiveContains(q) { return true }
+            if e.rawJSON.localizedCaseInsensitiveContains(q) { return true }
         }
         return false
     }
@@ -410,7 +409,6 @@ private extension Session {
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "yyyy-MM-dd'T'HH-mm-ss"
         f.timeZone = TimeZone.current  // Use local timezone, not UTC
-        print("🕐 [DEBUG] DateFormatter timezone: \(f.timeZone?.identifier ?? "nil")")
         return f
     }()
     static func firstCommandLine(from raw: String?) -> String? {
