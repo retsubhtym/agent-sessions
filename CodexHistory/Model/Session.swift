@@ -95,10 +95,35 @@ public struct Session: Identifiable, Equatable, Codable {
     }
     public var repoName: String? {
         guard let cwd else { return nil }
-        if let info = Self.gitInfo(from: cwd) { return URL(fileURLWithPath: info.root).lastPathComponent }
+        
+        // 1. Try git repository detection first
+        if let info = Self.gitInfo(from: cwd) { 
+            return URL(fileURLWithPath: info.root).lastPathComponent 
+        }
+        
+        // 2. Fallback: use directory name if it looks like a project
+        let url = URL(fileURLWithPath: cwd)
+        let dirName = url.lastPathComponent
+        
+        // Skip generic directory names that aren't useful
+        let genericNames = ["Documents", "Desktop", "Downloads", "tmp", "temp", "src", "code"]
+        if !genericNames.contains(dirName) && !dirName.isEmpty && dirName != "." {
+            return dirName
+        }
+        
+        // 3. Final fallback: try parent directory name
+        let parent = url.deletingLastPathComponent()
+        let parentName = parent.lastPathComponent
+        if !genericNames.contains(parentName) && !parentName.isEmpty && parentName != "." {
+            return parentName
+        }
+        
         return nil
     }
-    public var repoDisplay: String { repoName ?? "—" }
+    
+    public var repoDisplay: String { 
+        repoName ?? (cwd != nil ? "Other" : "—") 
+    }
     public var isWorktree: Bool { (cwd.flatMap { Self.gitInfo(from: $0)?.isWorktree }) ?? false }
     public var isSubmodule: Bool { (cwd.flatMap { Self.gitInfo(from: $0)?.isSubmodule }) ?? false }
 
