@@ -30,10 +30,6 @@ struct TranscriptPlainView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if let session = currentSession {
-                sessionHeader(session)
-                Divider()
-            }
             toolbar
             Divider()
             PlainTextScrollView(text: transcript, selection: selectedNSRange, fontSize: CGFloat(transcriptFontSize), highlights: highlightRanges, currentIndex: currentMatchIndex, commandRanges: (renderModeRaw == TranscriptRenderMode.terminal.rawValue && colorizeCommands) ? commandRanges : [], userRanges: colorizeCommands ? userRanges : [])
@@ -59,37 +55,6 @@ struct TranscriptPlainView: View {
         guard let sid = sessionID else { return nil }
         if let s = indexer.sessions.first(where: { $0.id == sid }) { return s }
         return indexer.allSessions.first(where: { $0.id == sid })
-    }
-
-    private func sessionHeader(_ session: Session) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(session.codexDisplayTitle)
-                    .font(.headline)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                HStack(spacing: 12) {
-                    Label(session.modifiedRelative, systemImage: "clock")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    if session.nonMetaCount > 0 {
-                        Label("\(session.nonMetaCount) messages", systemImage: "bubble.left.and.bubble.right")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    if !session.repoDisplay.isEmpty {
-                        Label(session.repoDisplay, systemImage: "folder")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
-                }
-            }
-            Spacer()
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(Color(NSColor.controlBackgroundColor))
     }
 
     private var toolbar: some View {
