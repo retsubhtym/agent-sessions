@@ -390,6 +390,7 @@ private extension Session {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "yyyy-MM-dd'T'HH-mm-ss"
+        f.timeZone = TimeZone.current  // Use local timezone, not UTC
         return f
     }()
     static func firstCommandLine(from raw: String?) -> String? {
