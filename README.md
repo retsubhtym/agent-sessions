@@ -1,5 +1,5 @@
-CodexHistory (macOS)
-====================
+Agent Sessions (macOS)
+======================
 
 What it is
 ----------
@@ -16,7 +16,7 @@ Directory rules
 ---------------
 - Codex CLI writes per‑session logs under `$CODEX_HOME/sessions/YYYY/MM/DD/rollout-*.jsonl`.
 - If `CODEX_HOME` is not set, the default is `~/.codex/sessions`.
-- CodexHistory resolves the root using:
+- Agent Sessions resolves the root using:
 
   ```swift
   let root = ProcessInfo.processInfo.environment["CODEX_HOME"].map { URL(fileURLWithPath: $0).appendingPathComponent("sessions") } ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(".codex/sessions")
@@ -24,7 +24,7 @@ Directory rules
 
 Build & run
 -----------
-- Open `CodexHistory.xcodeproj` in Xcode and run the `CodexHistory` scheme.
+- Open `AgentSessions.xcodeproj` in Xcode and run the `AgentSessions` scheme.
 - First run: if the default folder is unreadable/missing, you'll be prompted to pick a custom path (also editable in Preferences).
 
 Testing
@@ -32,7 +32,7 @@ Testing
 - From Terminal:
 
   ```bash
-  xcodebuild -project CodexHistory.xcodeproj -scheme CodexHistory -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test
+  xcodebuild -project AgentSessions.xcodeproj -scheme AgentSessions -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test
   ```
 
 MVP features (implemented)
@@ -64,13 +64,13 @@ Known limitations / V2 (out of scope)
 
 Project structure
 -----------------
-- `CodexHistory/` – app sources
+- `AgentSessions/` – app sources
   - `Model/` – `Session`, `SessionEvent`
   - `Services/` – `SessionIndexer`
   - `Views/` – three‑pane UI and preferences
   - `Utilities/` – `JSONLReader`, `PrettyJSON`
 - `Resources/Fixtures/` – test fixtures
-- `CodexHistoryTests/` – unit tests
+- `AgentSessionsTests/` – unit tests
 - `.github/workflows/ci.yml` – CI builds and tests on `macos-latest`
 
 Documentation

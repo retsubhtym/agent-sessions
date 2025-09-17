@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 
 @main
-struct CodexHistoryApp: App {
+struct AgentSessionsApp: App {
     @StateObject private var indexer = SessionIndexer()
     @AppStorage("TranscriptFontSize") private var transcriptFontSize: Double = 13
     @AppStorage("LayoutMode") private var layoutModeRaw: String = LayoutMode.vertical.rawValue
@@ -12,7 +12,7 @@ struct CodexHistoryApp: App {
     @State private var showingFirstRunPrompt: Bool = false
 
     var body: some Scene {
-        WindowGroup("Agent History") {
+        WindowGroup("Agent Sessions") {
             ContentView(layoutMode: LayoutMode(rawValue: layoutModeRaw) ?? .vertical,
                         onToggleLayout: {
                             let current = LayoutMode(rawValue: layoutModeRaw) ?? .vertical
@@ -118,7 +118,7 @@ private struct FirstRunPrompt: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Choose Codex sessions directory")
                 .font(.title2).bold()
-            Text("CodexHistory could not read the default sessions folder. Pick a custom path or set the CODEX_HOME environment variable.")
+            Text("Agent Sessions could not read the default sessions folder. Pick a custom path or set the CODEX_HOME environment variable.")
                 .foregroundStyle(.secondary)
             HStack {
                 Button("Pick Folder…") { pickFolder() }

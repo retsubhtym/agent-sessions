@@ -1,6 +1,6 @@
 # Codex CLI Resume Behavior (v0.34)
 
-This document records how `codex --resume` and `--continue` work in Codex CLI 0.34, based on source review. It guides how CodexHistory should mirror and integrate with the official flow.
+This document records how `codex --resume` and `--continue` work in Codex CLI 0.34, based on source review. It guides how Agent Sessions should mirror and integrate with the official flow.
 
 ## Flags and UX
 - `--resume`: opens a TUI picker of recorded sessions instead of starting fresh.
@@ -34,7 +34,7 @@ This document records how `codex --resume` and `--continue` work in Codex CLI 0.
 - Undocumented config key: `experimental_resume: <absolute .jsonl path>`.
 - If present, the CLI resumes that session directly on startup, bypassing the picker.
 
-## Implications for CodexHistory
+## Implications for Agent Sessions
 - Default list: show “Recent (global)” newest-first using filename timestamps; do not assume repo scoping.
 - Title/preview: replicate the head-parse behavior to surface the first real user message.
 - Repo column and filter: allowed as an app-level convenience using `SessionMeta.cwd`, but not part of Codex’s picker semantics.

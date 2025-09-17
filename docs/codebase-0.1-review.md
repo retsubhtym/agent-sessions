@@ -1,6 +1,6 @@
-# CodexHistory Codebase Review (v0.1)
+# Agent Sessions Codebase Review (v0.1)
 
-This document captures a focused review of the CodexHistory macOS app as of version 0.1, based on the current repository state. It highlights architecture, data flow, key modules, testing and CI coverage, and prioritized recommendations.
+This document captures a focused review of the Agent Sessions macOS app (formerly CodexHistory) as of version 0.1, based on the current repository state. It highlights architecture, data flow, key modules, testing and CI coverage, and prioritized recommendations.
 
 ## TL;DR
 - Purpose: Read‑only, fast viewer for Codex CLI JSONL session logs with search and filters.
@@ -46,7 +46,7 @@ Sessions directory
   - `SearchFiltersView`: Search bar only.
   - `PreferencesView`: Sessions root override + appearance (theme) selection.
   - Additional (not wired in split view by default): `SessionTimelineView`, `EventInspectorView`.
-- `CodexHistoryApp.swift`: App entry and window/commands; first‑run prompt if default folder is not readable.
+- `AgentSessionsApp.swift`: App entry and window/commands; first‑run prompt if default folder is not readable.
 
 ## Data Model and Parsing
 
@@ -154,10 +154,10 @@ Notes:
 
 ## Build & Run
 
-- Xcode: Open `CodexHistory.xcodeproj` and run the `CodexHistory` scheme.
+- Xcode: Open `Agent Sessions.xcodeproj` and run the `Agent Sessions` scheme.
 - CLI tests:
   ```bash
-  xcodebuild -project CodexHistory.xcodeproj -scheme CodexHistory -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test
+  xcodebuild -project Agent Sessions.xcodeproj -scheme Agent Sessions -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test
   ```
 
 ## Recent Changes (since initial MVP commit)

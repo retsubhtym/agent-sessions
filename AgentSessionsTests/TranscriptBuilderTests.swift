@@ -1,5 +1,5 @@
 import XCTest
-@testable import CodexHistory
+@testable import AgentSessions
 
 final class TranscriptBuilderTests: XCTestCase {
     // Helper to build a session from raw line strings

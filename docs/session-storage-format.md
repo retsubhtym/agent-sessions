@@ -146,7 +146,7 @@ For contributors and downstream tooling, a minimal schema for our normalized `Se
 - `docs/schemas/session_event.schema.json`
 
 Notes:
-- This schema covers the normalized output used by CodexHistory after parsing a raw JSONL line, not the raw input format, which varies by client/version.
+- This schema covers the normalized output used by Agent Sessions after parsing a raw JSONL line, not the raw input format, which varies by client/version.
 - The schema is permissive (`additionalProperties: true`) and only requires `id`, `kind`, and `rawJSON`.
 
 ## Provenance

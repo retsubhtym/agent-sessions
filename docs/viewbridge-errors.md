@@ -1,7 +1,7 @@
-# ViewBridge Error Messages in CodexHistory
+# ViewBridge Error Messages in Agent Sessions
 
 ## Overview
-When running CodexHistory, you may see error messages in the debug console related to ViewBridge and RemoteViewService. These are **benign system messages** that do not indicate any issues with the application.
+When running Agent Sessions, you may see error messages in the debug console related to ViewBridge and RemoteViewService. These are **benign system messages** that do not indicate any issues with the application.
 
 ## Common Error Messages
 
@@ -24,7 +24,7 @@ Errors found! Invalidating cache
 ### ViewBridge Messages
 These messages occur when macOS system UI components temporarily connect and disconnect from remote view services. This is **normal behavior** when the app:
 
-1. **Opens file/folder pickers** - The `NSOpenPanel` in FirstRunPrompt for selecting the Codex sessions directory
+1. **Opens file/folder pickers** - The `NSOpenPanel` in FirstRunPrompt for selecting the Codex CLI sessions directory
 2. **Shows preferences window** - The PreferencesWindowController uses NSHostingController to display SwiftUI views
 3. **Uses any system UI components** - Color pickers, font panels, or other system-provided UI elements
 
@@ -39,7 +39,7 @@ The Metal library errors occur because:
 
 To ensure proper file system access for the developer tool:
 
-1. **Created entitlements file** (`CodexHistory.entitlements`) without app sandbox:
+1. **Created entitlements file** (`AgentSessions.entitlements`) without app sandbox:
    - No sandbox restrictions (developer tool needs full file system access)
    - Allows reading from `~/.codex/sessions` or `CODEX_HOME/sessions`
    - Users can select custom session directories
@@ -71,7 +71,7 @@ All of these are **benign** and can be safely ignored:
 - `Errors found! Invalidating cache` - System clearing Metal shader cache
 
 ### App Sandbox Decision
-CodexHistory does **not** use app sandboxing because:
+Agent Sessions does **not** use app sandboxing because:
 - It's a developer tool that needs to read session files from arbitrary locations
 - Users may have `CODEX_HOME` set to various paths
 - The app needs flexibility to access different directories based on user configuration

@@ -1,5 +1,5 @@
 import XCTest
-@testable import CodexHistory
+@testable import AgentSessions
 
 final class SessionTitleTests: XCTestCase {
     private func event(id: String, kind: SessionEventKind, text: String? = nil, tool: String? = nil) -> SessionEvent {

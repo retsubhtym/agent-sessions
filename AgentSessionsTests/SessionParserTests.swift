@@ -1,5 +1,5 @@
 import XCTest
-@testable import CodexHistory
+@testable import AgentSessions
 
 final class SessionParserTests: XCTestCase {
     func fixtureURL(_ name: String) -> URL {

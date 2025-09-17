@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/schemas/session_event.schema.json",
-  "title": "SessionEvent (CodexHistory normalized)",
+  "title": "SessionEvent (Agent Sessions normalized)",
   "type": "object",
   "additionalProperties": true,
   "required": ["id", "kind", "rawJSON"],

@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "B0000010CA0A000100000001"
-               BuildableName = "CodexHistory.app"
-               BlueprintName = "CodexHistory"
-               ReferencedContainer = "container:CodexHistory.xcodeproj">
+               BuildableName = "AgentSessions.app"
+               BlueprintName = "AgentSessions"
+               ReferencedContainer = "container:AgentSessions.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "B0000010FA0A000100000001"
-               BuildableName = "CodexHistoryTests.xctest"
-               BlueprintName = "CodexHistoryTests"
-               ReferencedContainer = "container:CodexHistory.xcodeproj">
+               BuildableName = "AgentSessionsTests.xctest"
+               BlueprintName = "AgentSessionsTests"
+               ReferencedContainer = "container:AgentSessions.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -43,9 +43,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "B0000010CA0A000100000001"
-            BuildableName = "CodexHistory.app"
-            BlueprintName = "CodexHistory"
-            ReferencedContainer = "container:CodexHistory.xcodeproj">
+            BuildableName = "AgentSessions.app"
+            BlueprintName = "AgentSessions"
+            ReferencedContainer = "container:AgentSessions.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </TestAction>
@@ -64,9 +64,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "B0000010CA0A000100000001"
-            BuildableName = "CodexHistory.app"
-            BlueprintName = "CodexHistory"
-            ReferencedContainer = "container:CodexHistory.xcodeproj">
+            BuildableName = "AgentSessions.app"
+            BlueprintName = "AgentSessions"
+            ReferencedContainer = "container:AgentSessions.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -81,9 +81,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "B0000010CA0A000100000001"
-            BuildableName = "CodexHistory.app"
-            BlueprintName = "CodexHistory"
-            ReferencedContainer = "container:CodexHistory.xcodeproj">
+            BuildableName = "AgentSessions.app"
+            BlueprintName = "AgentSessions"
+            ReferencedContainer = "container:AgentSessions.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

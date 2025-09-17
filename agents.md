@@ -1,4 +1,4 @@
-# CodexHistory Agents Playbook
+# Agent Sessions Agents Playbook
 
 ## Required workflow (for humans and agents)
 1) Use Conventional Commits for every commit.

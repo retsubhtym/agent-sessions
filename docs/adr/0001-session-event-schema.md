@@ -4,7 +4,7 @@
 - Date: 2025-09-12
 
 ## Context
-Codex CLI session logs are JSON Lines with variable shapes depending on client/version. CodexHistory parses each line into a normalized `SessionEvent` used by indexing, search, and rendering. Without a documented contract, downstream code and contributions rely on implicit knowledge in parser tests and source comments.
+Codex CLI session logs are JSON Lines with variable shapes depending on client/version. Agent Sessions parses each line into a normalized `SessionEvent` used by indexing, search, and rendering. Without a documented contract, downstream code and contributions rely on implicit knowledge in parser tests and source comments.
 
 ## Decision
 Adopt a minimal, permissive JSON Schema that documents our normalized `SessionEvent` structure. The schema is intentionally small, requires only core identifiers, and allows additional properties to accommodate evolution.

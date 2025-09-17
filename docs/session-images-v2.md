@@ -1,6 +1,6 @@
 # Session Images: Storage Notes and V2 Plan
 
-This document explains how images appear in Codex CLI session JSONL logs and outlines a pragmatic V2 plan to surface them in CodexHistory while preserving privacy and performance.
+This document explains how images appear in Codex CLI session JSONL logs and outlines a pragmatic V2 plan to surface them in Agent Sessions while preserving privacy and performance.
 
 ## What Sessions May Contain
 - Image content parts from assistant/user messages:
