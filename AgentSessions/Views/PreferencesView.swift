@@ -106,14 +106,10 @@ struct PreferencesView: View {
             GroupBox(label: Text("Display Options").bold()) {
                 VStack(alignment: .leading, spacing: 8) {
                     PrefRowSpacer {
-                        Toggle("Show ID", isOn: $indexer.showIDColumn)
                         Toggle("Show Date", isOn: $indexer.showModifiedColumn)
                         Toggle("Show Msgs", isOn: $indexer.showMsgsColumn)
                         Toggle("Show Project", isOn: $indexer.showProjectColumn)
                         Toggle("Show Session", isOn: $indexer.showTitleColumn)
-                    }
-                    PrefRowSpacer {
-                        Toggle("Project before Title", isOn: $indexer.projectBeforeTitle)
                     }
                 }
             }
