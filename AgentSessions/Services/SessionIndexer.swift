@@ -50,12 +50,10 @@ final class SessionIndexer: ObservableObject {
     @AppStorage("ModifiedDisplay") private var modifiedDisplayRaw: String = ModifiedDisplay.relative.rawValue
     @AppStorage("TranscriptRenderMode") private var renderModeRaw: String = TranscriptRenderMode.normal.rawValue
     // Column visibility/order prefs
-    @AppStorage("ShowIDColumn") var showIDColumn: Bool = false
     @AppStorage("ShowModifiedColumn") var showModifiedColumn: Bool = true
     @AppStorage("ShowMsgsColumn") var showMsgsColumn: Bool = true
     @AppStorage("ShowProjectColumn") var showProjectColumn: Bool = true
     @AppStorage("ShowTitleColumn") var showTitleColumn: Bool = true
-    @AppStorage("ProjectBeforeTitle") var projectBeforeTitle: Bool = true
     // Persist active project filter
     @AppStorage("ProjectFilter") private var projectFilterStored: String = ""
 

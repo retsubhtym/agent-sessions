@@ -53,13 +53,6 @@ struct SessionsListView: View {
             }
             .width(min: indexer.showMsgsColumn ? 64 : 0, ideal: indexer.showMsgsColumn ? 64 : 0, max: indexer.showMsgsColumn ? 80 : 0)
 
-            // ID (last column; hide via zero width)
-            TableColumn("ID", value: \Session.shortID) { s in
-                Text(s.shortID)
-                    .font(.system(size: 13, weight: .bold, design: .monospaced))
-                    .foregroundStyle(.secondary)
-            }
-            .width(min: indexer.showIDColumn ? 64 : 0, ideal: indexer.showIDColumn ? 64 : 0, max: indexer.showIDColumn ? 64 : 0)
         }
         .tableStyle(.inset(alternatesRowBackgrounds: true))
         .environment(\.defaultMinListRowHeight, 22)
