@@ -15,12 +15,12 @@ final class PreferencesWindowController: NSObject, NSWindowDelegate {
 
         let hosting = NSHostingController(rootView: PreferencesView().environmentObject(indexer))
         let win = NSWindow(contentViewController: hosting)
-        win.title = "Settings"
+        win.title = "Preferences"
         win.styleMask = [.titled, .closable, .miniaturizable]
         win.isReleasedWhenClosed = false
         win.center()
         win.setFrameAutosaveName("PreferencesWindow")
-        win.setContentSize(NSSize(width: 720, height: 520))
+        win.setContentSize(NSSize(width: 740, height: 520))
         win.delegate = self
         self.window = win
         win.makeKeyAndOrderFront(nil)
@@ -34,4 +34,3 @@ final class PreferencesWindowController: NSObject, NSWindowDelegate {
         }
     }
 }
-
