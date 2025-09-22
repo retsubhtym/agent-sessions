@@ -178,7 +178,6 @@ struct TranscriptPlainView: View {
                 errorRanges = []
                 
                 // Find user input ranges in normal mode
-                let ns = transcript as NSString
                 let lines = transcript.split(separator: "\n", omittingEmptySubsequences: false)
                 var cursor = 0
                 
@@ -287,7 +286,6 @@ struct TranscriptPlainView: View {
     }
     
     private func findAdditionalRanges() {
-        let ns = transcript as NSString
         let lines = transcript.split(separator: "\n", omittingEmptySubsequences: false)
         var cursor = 0
         

@@ -4,7 +4,6 @@ import XCTest
 final class TranscriptBuilderTests: XCTestCase {
     // Helper to build a session from raw line strings
     private func session(from lines: [String]) -> Session {
-        let idx = SessionIndexer()
         var events: [SessionEvent] = []
         for (i, line) in lines.enumerated() {
             events.append(SessionIndexer.parseLine(line, eventID: "e-\(i)").0)
