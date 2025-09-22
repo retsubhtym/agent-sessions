@@ -6,7 +6,7 @@
 > Three-pane browser with full-text search, filters, and a clean SwiftUI UI.
 
 <div align="center">
-  <img src="assets/AgentSessions.png" alt="App Icon" width="128" height="128"/>
+  <img src="docs/assets/app-icon-512.png" alt="App Icon" width="128" height="128"/>
 </div>
 
 ---
