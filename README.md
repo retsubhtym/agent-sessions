@@ -1,80 +1,32 @@
-Agent Sessions (macOS)
-======================
+# Agent Sessions (macOS)
 
-What it is
-----------
-- A fast, native macOS viewer/indexer for Codex CLI session logs.
-- Reads existing JSON Lines logs and provides a three‑pane browser with full‑text search and filters.
-- It does NOT resume or continue sessions; it is a read‑only viewer (by design for MVP).
+[![Build](https://github.com/jazzyalex/agent-sessions/actions/workflows/ci.yml/badge.svg)](https://github.com/jazzyalex/agent-sessions/actions/workflows/ci.yml)
 
-Requirements
-------------
+> Fast, native macOS viewer/indexer for **Codex CLI** session logs.  
+> Three-pane browser with full-text search, filters, and a clean SwiftUI UI.
+
+<div align="center">
+  <img src="assets/AgentSessions.png" alt="App Icon" width="96" height="96"/>
+</div>
+
+## ✨ What it is
+- Reads **JSON Lines** logs produced by Codex CLI and builds a searchable timeline of sessions.
+- **Three-pane UI**: sidebar (sessions), transcript, and details; debounced search and filters.
+- **Privacy-friendly**: indexes **local files only**; no network required.
+
+## 🧰 Requirements
+- macOS 14 (Sonoma) or newer
 - Xcode 15+ / Swift 5.9+
-- macOS 14 Sonoma or newer
 
-Directory rules
----------------
-- Codex CLI writes per‑session logs under `$CODEX_HOME/sessions/YYYY/MM/DD/rollout-*.jsonl`.
-- If `CODEX_HOME` is not set, the default is `~/.codex/sessions`.
-- Agent Sessions resolves the root using:
+## 📦 Install
 
-  ```swift
-  let root = ProcessInfo.processInfo.environment["CODEX_HOME"].map { URL(fileURLWithPath: $0).appendingPathComponent("sessions") } ?? URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(".codex/sessions")
-  ```
+### Option A — Download
+- Get the latest **.dmg** from [Releases](./releases) and drag to Applications.
 
-Build & run
------------
-- Open `AgentSessions.xcodeproj` in Xcode and run the `AgentSessions` scheme.
-- First run: if the default folder is unreadable/missing, you'll be prompted to pick a custom path (also editable in Preferences).
-
-Testing
--------
-- From Terminal:
-
-  ```bash
-  xcodebuild -project AgentSessions.xcodeproj -scheme AgentSessions -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test
-  ```
-
-MVP features (implemented)
---------------------------
-- Parser + indexer
-  - Recursively scans date‑sharded dirs for `rollout-*.jsonl`.
-  - Streams JSONL line‑by‑line with tolerant decoding (keeps raw JSON when shape varies).
-  - Builds `Session` models with metadata and `SessionEvent`s.
-  - Refresh with in‑progress status and incremental updates.
-- Two‑pane SwiftUI UI
-  - Sidebar grouped by Today/Yesterday/yyyy‑MM‑dd/Older with enriched rows (ID, modified, msgs, branch, summary, model).
-  - Transcript detail uses Codex‑like style with prefixes, role colors, optional timestamps, and ANSI export.
-- Whole‑session Raw/Pretty is currently hidden from menus.
-- Search + filters
-  - Debounced full‑text search across all event text.
-  - Filters: date range, model dropdown, message‑type toggles.
-- Preferences for path override (persisted in `UserDefaults`).
- - Appearance: theme (Codex Dark / Monochrome), toggle timestamps.
-
-Privacy
--------
-- Reads local log files only. No network access is required for indexing or viewing.
-
-Known limitations / V2 (out of scope)
--------------------------------------
-- Export to Markdown/JSONL.
-- Sensitive content masking toggle.
-- Resume/continue Codex session.
-
-Project structure
------------------
-- `AgentSessions/` – app sources
-  - `Model/` – `Session`, `SessionEvent`
-  - `Services/` – `SessionIndexer`
-  - `Views/` – three‑pane UI and preferences
-  - `Utilities/` – `JSONLReader`, `PrettyJSON`
-- `Resources/Fixtures/` – test fixtures
-- `AgentSessionsTests/` – unit tests
-- `.github/workflows/ci.yml` – CI builds and tests on `macos-latest`
-
-Documentation
--------------
-- Codebase review (v0.1): `docs/codebase-0.1-review.md`
-- Changelog: `docs/CHANGELOG.md`
-- Session storage format: `docs/session-storage-format.md`
+### Option B — Build from source
+```bash
+git clone https://github.com/jazzyalex/agent-sessions.git
+cd agent-sessions
+open AgentSessions.xcodeproj
+# Run the "AgentSessions" scheme
+```
