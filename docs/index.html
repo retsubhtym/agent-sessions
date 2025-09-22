@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent Sessions — fast, local viewer for AI agent sessions</title>
+  <meta name="description" content="Agent Sessions is a macOS app that lets you search, filter, and review AI coding agent sessions (Codex, Claude, etc.) with a plain-text transcript and developer-friendly tools." />
+  <link rel="icon" href="assets/app-icon-512.png" />
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Roboto, Helvetica, Arial, sans-serif; margin:0; background:#f6f8fa; color:#1b1f23; }
+    header { background:#f6f8fa; padding:20px; color:#24292e; display:flex; align-items:center; justify-content:space-between; }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .brand img { width:40px; height:40px; border-radius:6px; }
+    header h1 { margin:0; font-size:20px; }
+    .container { max-width: 900px; margin: 0 auto; padding: 30px; }
+    h2 { font-size:28px; margin-top:0; }
+    p { line-height:1.6; }
+    .btn { display:inline-block; margin:10px 10px 0 0; padding:10px 16px; border-radius:8px; text-decoration:none; font-weight:600; }
+    .btn.primary { background:#2f81f7; color:white; }
+    .btn.secondary { background:white; border:1px solid #d0d7de; color:#2f81f7; }
+    .features { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; margin-top:30px; }
+    .card { background:white; border:1px solid #d0d7de; border-radius:8px; padding:20px; }
+    .card h3 { margin:0 0 10px; font-size:18px; }
+    .card.grey { background:#f3f4f6; color:#586069; border:1px dashed #d0d7de; }
+    footer { text-align:center; margin:40px 0 20px; font-size:14px; color:#586069; }
+    code { background:#f3f4f6; padding:2px 6px; border-radius:4px; font-family: ui-monospace, Menlo, Monaco, Consolas, monospace; font-size:14px; }
+    img.screenshot { width:100%; border-radius:8px; border:1px solid #d0d7de; margin-top:20px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="assets/app-icon-512.png" alt="Agent Sessions icon" />
+      <h1>Agent Sessions</h1>
+    </div>
+    <span>macOS • Open Source</span>
+  </header>
+  <div class="container">
+    <h2>Fast, local viewer for AI agent sessions</h2>
+    <p>Agent Sessions helps developers search, filter, and explore plain-text transcripts of AI coding agent sessions (Codex, Claude, etc.). It’s local-first, private, and designed with developers in mind.</p>
+
+    <a href="../../releases/latest" class="btn primary">⬇ Download for macOS</a>
+    <a href="https://brew.sh" class="btn secondary">brew cask</a>
+    <a href="https://github.com/jazzyalex/agent-sessions" class="btn secondary">View on GitHub</a>
+
+    <h3 style="margin-top:40px;">Install via Homebrew</h3>
+    <pre><code>brew install --cask agent-sessions</code></pre>
+
+    <div class="features">
+      <div class="card">
+        <h3>Plain Transcript</h3>
+        <p>Readable transcript viewer with no truncation. Copy & paste exactly what you see.</p>
+      </div>
+      <div class="card">
+        <h3>Search & Filters</h3>
+        <p>Sort and filter by Modified, Msgs, Title, Repo. Quickly find the session you need.</p>
+      </div>
+      <div class="card">
+        <h3>Repo Awareness</h3>
+        <p>Repo column with tooltip showing the full directory path for context.</p>
+      </div>
+      <div class="card grey">
+        <h3>Resume (Experimental)</h3>
+        <p>This feature is still in development. Attempt to resume sessions in Terminal using upstream flags. Falls back safely if unsupported.</p>
+      </div>
+      <div class="card">
+        <h3>Local-only</h3>
+        <p>Runs on your Mac. Reads <code>~/.codex/sessions</code>. No network or cloud required.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:40px;">Screenshots</h3>
+    <img src="assets/screenshot-V.png" alt="Sessions table screenshot" style="width:100%; max-width:960px; margin:10px 0;" />
+    <img src="assets/screenshot-H.png" alt="Transcript viewer screenshot" style="width:100%; max-width:960px; margin:10px 0;" />
+
+    <footer>
+      © <span id="year"></span> Agent Sessions • <a href="./privacy.html">Privacy</a> • <a href="./security.html">Security</a>
+    </footer>
+  </div>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
