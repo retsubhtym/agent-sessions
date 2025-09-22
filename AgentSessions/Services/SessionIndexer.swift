@@ -3,6 +3,7 @@ import Combine
 import CryptoKit
 import SwiftUI
 
+// swiftlint:disable type_body_length
 final class SessionIndexer: ObservableObject {
     // Source of truth
     @Published private(set) var allSessions: [Session] = []
@@ -13,7 +14,7 @@ final class SessionIndexer: ObservableObject {
     @Published var progressText: String = ""
     @Published var filesProcessed: Int = 0
     @Published var totalFiles: Int = 0
-    
+
     // Error states
     @Published var indexingError: String? = nil
     @Published var hasEmptyDirectory: Bool = false
@@ -97,11 +98,11 @@ final class SessionIndexer: ObservableObject {
                 let (q, from, to, model) = input
                 let filters = Filters(query: q, dateFrom: from, dateTo: to, model: model, kinds: kinds, repoName: self?.projectFilter, pathContains: nil)
                 var results = FilterEngine.filterSessions(all, filters: filters)
-                
+
                 if self?.hideZeroMessageSessionsPref ?? true {
                     results = results.filter { $0.nonMetaCount > 0 }
                 }
-                
+
                 return results
             }
             .receive(on: DispatchQueue.main)
@@ -179,7 +180,7 @@ final class SessionIndexer: ObservableObject {
                 }
                 return
             }
-            
+
             var found: [URL] = []
             if let en = fm.enumerator(at: root, includingPropertiesForKeys: [.isRegularFileKey], options: [.skipsHiddenFiles]) {
                 for case let url as URL in en {
@@ -188,7 +189,7 @@ final class SessionIndexer: ObservableObject {
                     }
                 }
             }
-            
+
             let sortedFiles = found.sorted { ($0.lastPathComponent) > ($1.lastPathComponent) }
             DispatchQueue.main.async {
                 self.totalFiles = sortedFiles.count
@@ -206,7 +207,7 @@ final class SessionIndexer: ObservableObject {
                     self.filesProcessed = i + 1
                     self.progressText = "Indexed \(i + 1)/\(sortedFiles.count)"
                     self.allSessions = sessions.sorted { $0.modifiedAt > $1.modifiedAt }
-                    
+
                 }
             }
 
@@ -250,6 +251,7 @@ final class SessionIndexer: ObservableObject {
         return session
     }
 
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     static func parseLine(_ line: String, eventID: String) -> (SessionEvent, String?) {
         var timestamp: Date? = nil
         var role: String? = nil
@@ -287,7 +289,7 @@ final class SessionIndexer: ObservableObject {
                     }
                 }
             }
-            
+
             // role / type (now checking in payload if present)
             if let r = workingObj["role"] as? String { role = r }
             if let t = workingObj["type"] as? String { type = t }
@@ -448,5 +450,6 @@ final class SessionIndexer: ObservableObject {
         }
     }
 }
+// swiftlint:enable type_body_length
 
 // (Codex picker parity helpers temporarily disabled while focusing on title parity.)

@@ -21,22 +21,22 @@ public struct Session: Identifiable, Equatable, Codable {
         if let codexTitle = codexPreviewTitle {
             return codexTitle
         }
-        
+
         // 2) Fallback: first non-empty user line (less filtering)
         if let t = events.first(where: { $0.kind == .user })?.text?.collapsedWhitespace(), !t.isEmpty {
             return t
         }
-        
+
         // 3) Fallback: first non-empty assistant line
         if let t = events.first(where: { $0.kind == .assistant })?.text?.collapsedWhitespace(), !t.isEmpty {
             return t
         }
-        
+
         // 4) Final fallback: first tool call name
         if let name = events.first(where: { $0.kind == .tool_call && ($0.toolName?.isEmpty == false) })?.toolName {
             return name
         }
-        
+
         return "No prompt"
     }
 
@@ -45,11 +45,11 @@ public struct Session: Identifiable, Equatable, Codable {
     // head of the file (first 10 records). If none found, the session is not shown.
     public var codexPreviewTitle: String? {
         let head = events.prefix(10)
-        
+
         // Find first meaningful user message, filtering out IDE scaffolding
         for event in head where event.kind == .user {
             guard let text = event.text?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else { continue }
-            
+
             // Filter out common IDE scaffolding patterns
             let lowerText = text.lowercased()
             let scaffoldingPatterns = [
@@ -65,23 +65,29 @@ public struct Session: Identifiable, Equatable, Codable {
                 "please follow",
                 "make sure to"
             ]
-            
+
             // Skip if it looks like scaffolding
             if scaffoldingPatterns.contains(where: { lowerText.hasPrefix($0) }) {
                 continue
             }
-            
+
             // Skip if it's very long (likely instructions)
             if text.count > 200 {
                 continue
             }
-            
+
             return text.collapsedWhitespace()
         }
-        
+
         // Fallback: first shell/tool command in head as a one-liner
-        if let call = head.first(where: { $0.kind == .tool_call && ($0.toolName?.lowercased().contains("shell") == true || $0.toolName?.lowercased().contains("bash") == true || $0.toolName?.lowercased().contains("sh") == true) }) {
-            if let cmd = Self.firstCommandLine(from: call.toolInput) { return cmd }
+        if let call = head.first(where: { event in
+            guard event.kind == .tool_call else { return false }
+            guard let name = event.toolName?.lowercased() else { return false }
+            return name.contains("shell") || name.contains("bash") || name.contains("sh")
+        }) {
+            if let cmd = Self.firstCommandLine(from: call.toolInput) {
+                return cmd
+            }
         }
         return nil
     }
@@ -90,11 +96,11 @@ public struct Session: Identifiable, Equatable, Codable {
     // rollout-YYYY-MM-DDThh-mm-ss-<uuid>.jsonl
     public var codexFilenameTimestamp: Date? {
         let filename = (filePath as NSString).lastPathComponent
-        
-        guard let match = Self.rolloutRegex.firstMatch(in: filename) else { 
-            return nil 
+
+        guard let match = Self.rolloutRegex.firstMatch(in: filename) else {
+            return nil
         }
-        
+
         let ts = match.ts
         let formatter = Self.rolloutDateFormatter
         return formatter.date(from: ts)
@@ -138,34 +144,34 @@ public struct Session: Identifiable, Equatable, Codable {
     }
     public var repoName: String? {
         guard let cwd else { return nil }
-        
+
         // 1. Try git repository detection first
-        if let info = Self.gitInfo(from: cwd) { 
-            return URL(fileURLWithPath: info.root).lastPathComponent 
+        if let info = Self.gitInfo(from: cwd) {
+            return URL(fileURLWithPath: info.root).lastPathComponent
         }
-        
+
         // 2. Fallback: use directory name if it looks like a project
         let url = URL(fileURLWithPath: cwd)
         let dirName = url.lastPathComponent
-        
+
         // Skip generic directory names that aren't useful
         let genericNames = ["Documents", "Desktop", "Downloads", "tmp", "temp", "src", "code"]
         if !genericNames.contains(dirName) && !dirName.isEmpty && dirName != "." {
             return dirName
         }
-        
+
         // 3. Final fallback: try parent directory name
         let parent = url.deletingLastPathComponent()
         let parentName = parent.lastPathComponent
         if !genericNames.contains(parentName) && !parentName.isEmpty && parentName != "." {
             return parentName
         }
-        
+
         return nil
     }
-    
-    public var repoDisplay: String { 
-        repoName ?? (cwd != nil ? "Other" : "—") 
+
+    public var repoDisplay: String {
+        repoName ?? (cwd != nil ? "Other" : "—")
     }
     public var isWorktree: Bool { (cwd.flatMap { Self.gitInfo(from: $0)?.isWorktree }) ?? false }
     public var isSubmodule: Bool { (cwd.flatMap { Self.gitInfo(from: $0)?.isSubmodule }) ?? false }
@@ -180,12 +186,12 @@ public struct Session: Identifiable, Equatable, Codable {
         return r.localizedString(for: ref, relativeTo: Date())
     }
 
-    public var modifiedAt: Date { 
+    public var modifiedAt: Date {
         // Use filename timestamp (session creation) like Codex CLI, fallback to session end/start
         let filenameDate = codexFilenameTimestamp
         let endDate = endTime
         let startDate = startTime
-        
+
         if let filenameDate = filenameDate {
             return filenameDate
         } else if let endDate = endDate {
@@ -392,9 +398,15 @@ private func extractBranch(fromOutput s: String) -> String? {
 // MARK: - Rollout filename regex helpers
 private struct RolloutMatch { let ts: String; let uuid: String }
 private struct RolloutRegex {
-    private let regex: NSRegularExpression
-    init() { regex = try! NSRegularExpression(pattern: "^rollout-([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}-[0-9]{2}-[0-9]{2})-([0-9a-fA-F-]+)\\.jsonl$") }
+    private let regex: NSRegularExpression?
+
+    init() {
+        let pattern = "^rollout-([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}-[0-9]{2}-[0-9]{2})-([0-9a-fA-F-]+)\\.jsonl$"
+        regex = try? NSRegularExpression(pattern: pattern)
+    }
+
     func firstMatch(in name: String) -> RolloutMatch? {
+        guard let regex else { return nil }
         let range = NSRange(location: 0, length: (name as NSString).length)
         guard let m = regex.firstMatch(in: name, range: range), m.numberOfRanges >= 3 else { return nil }
         let ns = name as NSString

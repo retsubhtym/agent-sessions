@@ -24,7 +24,7 @@ struct TranscriptPlainView: View {
     @State private var showTimestamps: Bool = false
     @AppStorage("TranscriptFontSize") private var transcriptFontSize: Double = 13
     @AppStorage("TranscriptRenderMode") private var renderModeRaw: String = TranscriptRenderMode.normal.rawValue
-    
+
     // Auto-colorize in Terminal mode
     private var shouldColorize: Bool {
         return renderModeRaw == TranscriptRenderMode.terminal.rawValue
@@ -41,7 +41,18 @@ struct TranscriptPlainView: View {
                 .frame(maxWidth: .infinity)
                 .background(Color(NSColor.controlBackgroundColor))
             Divider()
-            PlainTextScrollView(text: transcript, selection: selectedNSRange, fontSize: CGFloat(transcriptFontSize), highlights: highlightRanges, currentIndex: currentMatchIndex, commandRanges: shouldColorize ? commandRanges : [], userRanges: shouldColorize ? userRanges : [], assistantRanges: shouldColorize ? assistantRanges : [], outputRanges: shouldColorize ? outputRanges : [], errorRanges: shouldColorize ? errorRanges : [])
+            PlainTextScrollView(
+                text: transcript,
+                selection: selectedNSRange,
+                fontSize: CGFloat(transcriptFontSize),
+                highlights: highlightRanges,
+                currentIndex: currentMatchIndex,
+                commandRanges: shouldColorize ? commandRanges : [],
+                userRanges: shouldColorize ? userRanges : [],
+                assistantRanges: shouldColorize ? assistantRanges : [],
+                outputRanges: shouldColorize ? outputRanges : [],
+                errorRanges: shouldColorize ? errorRanges : []
+            )
         }
         .onAppear { syncPrefs(); rebuild() }
         .onChange(of: sessionID) { _, _ in rebuild() }
@@ -69,35 +80,35 @@ struct TranscriptPlainView: View {
         HStack(spacing: 6) {
             // Find controls group
             HStack(spacing: 4) {
-                Button(action: { performFind(resetIndex: true) }) { 
+                Button(action: { performFind(resetIndex: true) }) {
                     Image(systemName: "magnifyingglass")
                         .frame(width: 16, height: 16)
                 }
                 .buttonStyle(.borderless)
                 .help("Find")
-                
+
                 TextField("Find", text: $findText)
                     .textFieldStyle(.roundedBorder)
                     .frame(minWidth: 120, maxWidth: 180)
                     .focused($findFocused)
                     .onSubmit { performFind(resetIndex: true) }
-                
-                Button(action: { performFind(resetIndex: false, direction: -1) }) { 
+
+                Button(action: { performFind(resetIndex: false, direction: -1) }) {
                     Image(systemName: "chevron.up")
                         .frame(width: 16, height: 16)
                 }
                 .buttonStyle(.borderless)
                 .help("Previous match")
                 .disabled(findMatches.isEmpty)
-                
-                Button(action: { performFind(resetIndex: false, direction: 1) }) { 
+
+                Button(action: { performFind(resetIndex: false, direction: 1) }) {
                     Image(systemName: "chevron.down")
                         .frame(width: 16, height: 16)
                 }
                 .buttonStyle(.borderless)
                 .help("Next match")
                 .disabled(findMatches.isEmpty)
-                
+
                 if !findText.isEmpty {
                     Text("\(findMatches.isEmpty ? 0 : currentMatchIndex + 1)/\(findMatches.count)")
                         .foregroundStyle(.secondary)
@@ -105,11 +116,11 @@ struct TranscriptPlainView: View {
                         .frame(minWidth: 35)
                 }
             }
-            
+
             Divider().frame(height: 20)
-            
+
             Spacer(minLength: 8)
-            
+
             // View controls group
             HStack(spacing: 6) {
                 Picker("View Style", selection: $renderModeRaw) {
@@ -119,7 +130,7 @@ struct TranscriptPlainView: View {
                 .pickerStyle(.segmented)
                 .frame(width: 140)
                 .labelsHidden()
-                
+
                 // Font size controls
                 HStack(spacing: 2) {
                     Button(action: { adjustFont(-1) }) {
@@ -129,7 +140,7 @@ struct TranscriptPlainView: View {
                     .buttonStyle(.borderless)
                     .accessibilityLabel("Make text smaller")
                     .help("Smaller (Cmd-)")
-                    
+
                     Button(action: { adjustFont(1) }) {
                         Image(systemName: "textformat.size.larger")
                             .frame(width: 20, height: 20)
@@ -138,7 +149,7 @@ struct TranscriptPlainView: View {
                     .accessibilityLabel("Make text bigger")
                     .help("Bigger (Cmd+=)")
                 }
-                
+
                 Button("Copy") { copyAll() }
                     .buttonStyle(.borderless)
                     .help("Copy entire transcript")
@@ -176,32 +187,32 @@ struct TranscriptPlainView: View {
                 assistantRanges = []
                 outputRanges = []
                 errorRanges = []
-                
+
                 // Find user input ranges in normal mode
                 let lines = transcript.split(separator: "\n", omittingEmptySubsequences: false)
                 var cursor = 0
-                
+
                 for line in lines {
                     let s = String(line)
                     var lineStr = s
                     var timestampOffset = 0
                     if lineStr.count >= 9, lineStr[lineStr.index(lineStr.startIndex, offsetBy: 2)] == ":" {
-                        if let space = lineStr.firstIndex(of: " ") { 
+                        if let space = lineStr.firstIndex(of: " ") {
                             timestampOffset = lineStr.distance(from: lineStr.startIndex, to: lineStr.index(after: space))
-                            lineStr = String(lineStr[lineStr.index(after: space)...]) 
+                            lineStr = String(lineStr[lineStr.index(after: space)...])
                         }
                     }
-                    
+
                     // User input: "> text"
                     if lineStr.hasPrefix("> ") {
                         let start = cursor + timestampOffset + 2
                         let len = (s as NSString).length - timestampOffset - 2
                         if len > 0 { userRanges.append(NSRange(location: start, length: len)) }
                     }
-                    
+
                     cursor += (s as NSString).length + 1
                 }
-                
+
                 // Find other content types
                 findAdditionalRanges()
             } else {
@@ -225,7 +236,7 @@ struct TranscriptPlainView: View {
             highlightRanges = []
             return
         }
-        
+
         // First search in the rendered transcript
         let lowerText = transcript.lowercased()
         let lowerQ = q.lowercased()
@@ -237,7 +248,7 @@ struct TranscriptPlainView: View {
             matches.append(origStart..<origEnd)
             searchStart = r.upperBound
         }
-        
+
         // If no matches in transcript, check if the term exists in raw session data
         // to provide feedback consistent with global search
         if matches.isEmpty, let session = currentSession {
@@ -248,13 +259,13 @@ struct TranscriptPlainView: View {
                 if e.rawJSON.localizedCaseInsensitiveContains(q) { return true }
                 return false
             }
-            
+
             // If found in raw data but not in transcript, show a helpful message
             if hasMatchInRawData {
                 // Insert a note in the transcript about hidden matches
                 let noteText = "\n[Note: '\(q)' found in raw session data but not in rendered transcript. Use Raw JSON view to see all content.]\n"
                 transcript += noteText
-                
+
                 // Find the note in the updated transcript
                 let updatedLowerText = transcript.lowercased()
                 if let noteRange = updatedLowerText.range(of: "note:") {
@@ -264,7 +275,7 @@ struct TranscriptPlainView: View {
                 }
             }
         }
-        
+
         findMatches = matches
         // Build NSRanges for temporary highlight attributes
         var nsRanges: [NSRange] = []
@@ -284,23 +295,23 @@ struct TranscriptPlainView: View {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(transcript, forType: .string)
     }
-    
+
     private func findAdditionalRanges() {
         let lines = transcript.split(separator: "\n", omittingEmptySubsequences: false)
         var cursor = 0
-        
+
         for line in lines {
             let s = String(line)
             // Skip timestamp prefix if present (HH:MM:SS format)
             var lineStr = s
             var timestampOffset = 0
             if lineStr.count >= 9, lineStr[lineStr.index(lineStr.startIndex, offsetBy: 2)] == ":" {
-                if let space = lineStr.firstIndex(of: " ") { 
+                if let space = lineStr.firstIndex(of: " ") {
                     timestampOffset = lineStr.distance(from: lineStr.startIndex, to: lineStr.index(after: space))
-                    lineStr = String(lineStr[lineStr.index(after: space)...]) 
+                    lineStr = String(lineStr[lineStr.index(after: space)...])
                 }
             }
-            
+
             // Tool output: "⟪out⟫ text"
             if lineStr.hasPrefix("⟪out⟫ ") {
                 let start = cursor + timestampOffset
@@ -319,7 +330,7 @@ struct TranscriptPlainView: View {
                 let len = (s as NSString).length - timestampOffset
                 if len > 0 { assistantRanges.append(NSRange(location: start, length: len)) }
             }
-            
+
             cursor += (s as NSString).length + 1
         }
     }

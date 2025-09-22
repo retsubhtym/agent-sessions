@@ -8,6 +8,7 @@ public enum TranscriptRenderMode: String, CaseIterable, Identifiable, Codable {
     public var id: String { rawValue }
 }
 
+// swiftlint:disable type_body_length
 struct SessionTranscriptBuilder {
     static let outPrefix = "⟪out⟫"
     static let toolPrefix = "› tool:"
@@ -424,3 +425,4 @@ struct SessionTranscriptBuilder {
         return String(s[..<end]) + "…"
     }
 }
+// swiftlint:enable type_body_length

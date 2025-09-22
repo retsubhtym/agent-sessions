@@ -58,4 +58,3 @@ final class SessionParserTests: XCTestCase {
         XCTAssertEqual(filtered.first?.id, s2.id)
     }
 }
-

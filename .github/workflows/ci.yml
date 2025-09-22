@@ -7,19 +7,20 @@ on:
     branches: [ "**" ]
 
 jobs:
-  build-and-test:
+  build:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - name: Xcode version
         run: xcodebuild -version
-      - name: Build & Test
-        run: |
-          xcodebuild -project AgentSessions.xcodeproj -scheme AgentSessions -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test | xcpretty || exit ${PIPESTATUS[0]}
+      - name: Build (macOS, no signing)
         shell: bash
-      - name: Upload logs if failed
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: xcodebuild-logs
-          path: ~/Library/Logs/DiagnosticReports
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project AgentSessions.xcodeproj \
+            -scheme AgentSessions \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            build

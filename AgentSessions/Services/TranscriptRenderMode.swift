@@ -5,4 +5,3 @@ public enum TranscriptRenderMode: String, CaseIterable, Identifiable, Codable {
     case terminal
     public var id: String { rawValue }
 }
-

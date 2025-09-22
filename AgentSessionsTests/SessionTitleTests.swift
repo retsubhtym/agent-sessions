@@ -66,4 +66,3 @@ final class SessionTitleTests: XCTestCase {
         XCTAssertEqual(s.title, "No prompt")
     }
 }
-

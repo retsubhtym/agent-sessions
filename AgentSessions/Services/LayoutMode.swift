@@ -5,4 +5,3 @@ enum LayoutMode: String, CaseIterable, Identifiable {
     case horizontal // top/bottom split
     var id: String { rawValue }
 }
-

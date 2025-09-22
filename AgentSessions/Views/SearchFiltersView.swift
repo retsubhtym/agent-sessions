@@ -27,7 +27,7 @@ struct SearchFiltersView: View {
                     isSearchFocused = true
                 }
             }
-            
+
             // Show active project filter with clear button
             if let projectFilter = indexer.projectFilter, !projectFilter.isEmpty {
                 HStack(spacing: 4) {
@@ -51,7 +51,7 @@ struct SearchFiltersView: View {
                 .background(Color.blue.opacity(0.1))
                 .background(RoundedRectangle(cornerRadius: 6).stroke(Color.blue.opacity(0.3)))
             }
-            
+
             Spacer(minLength: 0)
         }
     }

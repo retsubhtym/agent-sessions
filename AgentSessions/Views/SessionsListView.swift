@@ -9,7 +9,7 @@ struct SessionsListView: View {
     @State private var sortOrder: [KeyPathComparator<Session>] = []
 
     @State private var cachedRows: [Session] = []
-    
+
     private var rows: [Session] { cachedRows }
 
     var body: some View {
@@ -21,7 +21,11 @@ struct SessionsListView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
-            .width(min: indexer.showTitleColumn ? 160 : 0, ideal: indexer.showTitleColumn ? 320 : 0, max: indexer.showTitleColumn ? 2000 : 0)
+            .width(
+                min: indexer.showTitleColumn ? 160 : 0,
+                ideal: indexer.showTitleColumn ? 320 : 0,
+                max: indexer.showTitleColumn ? 2000 : 0
+            )
 
             // Date (renamed from Modified)
             TableColumn("Date", value: \Session.modifiedAt) { s in
@@ -33,7 +37,11 @@ struct SessionsListView: View {
                     .foregroundStyle(.secondary)
                     .help(helpText)
             }
-            .width(min: indexer.showModifiedColumn ? 120 : 0, ideal: indexer.showModifiedColumn ? 120 : 0, max: indexer.showModifiedColumn ? 140 : 0)
+            .width(
+                min: indexer.showModifiedColumn ? 120 : 0,
+                ideal: indexer.showModifiedColumn ? 120 : 0,
+                max: indexer.showModifiedColumn ? 140 : 0
+            )
 
             // Project
             TableColumn("Project", value: \Session.repoDisplay) { s in
@@ -42,16 +50,29 @@ struct SessionsListView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .help(projectTooltip(for: s))
-                    .onTapGesture { if let name = s.repoName { indexer.projectFilter = name; indexer.recomputeNow() } }
+                    .onTapGesture {
+                        if let name = s.repoName {
+                            indexer.projectFilter = name
+                            indexer.recomputeNow()
+                        }
+                    }
             }
-            .width(min: indexer.showProjectColumn ? 120 : 0, ideal: indexer.showProjectColumn ? 160 : 0, max: indexer.showProjectColumn ? 240 : 0)
+            .width(
+                min: indexer.showProjectColumn ? 120 : 0,
+                ideal: indexer.showProjectColumn ? 160 : 0,
+                max: indexer.showProjectColumn ? 240 : 0
+            )
 
             // Msgs
             TableColumn("Msgs", value: \Session.nonMetaCount) { s in
                 Text(String(format: "%3d", s.nonMetaCount))
                     .font(.system(size: 13, weight: .regular, design: .monospaced))
             }
-            .width(min: indexer.showMsgsColumn ? 64 : 0, ideal: indexer.showMsgsColumn ? 64 : 0, max: indexer.showMsgsColumn ? 80 : 0)
+            .width(
+                min: indexer.showMsgsColumn ? 64 : 0,
+                ideal: indexer.showMsgsColumn ? 64 : 0,
+                max: indexer.showMsgsColumn ? 80 : 0
+            )
 
         }
         .tableStyle(.inset(alternatesRowBackgrounds: true))
@@ -150,7 +171,7 @@ struct SessionsListView: View {
     private func updateCachedRows() {
         cachedRows = indexer.sessions.sorted(using: sortOrder)
     }
-    
+
     private func reveal(_ session: Session) {
         NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: session.filePath)])
     }

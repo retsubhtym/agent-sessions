@@ -47,8 +47,6 @@ struct AgentSessionsApp: App {
         }
     }
 }
-
-
 private struct ContentView: View {
     @EnvironmentObject var indexer: SessionIndexer
     @State private var selection: String?
@@ -135,7 +133,10 @@ private struct FirstRunPrompt: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Choose Codex sessions directory")
                 .font(.title2).bold()
-            Text("Agent Sessions could not read the default sessions folder. Pick a custom path or set the CODEX_HOME environment variable.")
+            Text(
+                "Agent Sessions could not read the default sessions folder. " +
+                "Pick a custom path or set the CODEX_HOME environment variable."
+            )
                 .foregroundStyle(.secondary)
             HStack {
                 Button("Pick Folder…") { pickFolder() }
