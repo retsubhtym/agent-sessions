@@ -265,3 +265,4 @@ private extension PreferencesView {
 // MARK: - Supporting Views
 
 // Old PreferenceCard removed in favor of flat, sectioned layout.
+
