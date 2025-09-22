@@ -15,7 +15,7 @@ jobs:
         run: xcodebuild -version
       - name: Build & Test
         run: |
-          xcodebuild -project CodexHistory.xcodeproj -scheme CodexHistory -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test | xcpretty || exit ${PIPESTATUS[0]}
+          xcodebuild -project AgentSessions.xcodeproj -scheme AgentSessions -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test | xcpretty || exit ${PIPESTATUS[0]}
         shell: bash
       - name: Upload logs if failed
         if: failure()
@@ -23,4 +23,3 @@ jobs:
         with:
           name: xcodebuild-logs
           path: ~/Library/Logs/DiagnosticReports
-

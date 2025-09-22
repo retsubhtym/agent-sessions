@@ -9,7 +9,6 @@
   <img src="docs/assets/app-icon-512.png" alt="App Icon" width="128" height="128"/>
 </div>
 
----
 
 ## ✨ What it is
 Agent Sessions reads **JSON Lines** logs produced by [Codex CLI](https://github.com/your-codex-cli-link)  
@@ -20,7 +19,6 @@ and builds a searchable timeline of your AI coding/chat sessions.
 - 🔍 **Search & filters**: full-text search, date ranges, model filter, message-type toggles  
 - 🎨 **SwiftUI design**: fast, clean, and privacy-friendly (local only)
 
----
 
 ## 🧰 Requirements
 - macOS 14 (Sonoma) or newer
@@ -28,7 +26,6 @@ and builds a searchable timeline of your AI coding/chat sessions.
 - Codex CLI logs in `$CODEX_HOME/sessions/YYYY/MM/DD/rollout-*.jsonl`  
   *(or `~/.codex/sessions/...`)*
 
----
 
 ## 📦 Install
 
