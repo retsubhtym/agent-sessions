@@ -38,3 +38,12 @@ and builds a searchable timeline of your AI coding/chat sessions.
 git clone https://github.com/jazzyalex/agent-sessions.git
 cd agent-sessions
 open AgentSessions.xcodeproj
+
+---
+
+## Disclaimer
+
+**Agent Sessions** is an independent open-source project.  
+It is **not affiliated with, endorsed by, or sponsored by OpenAI, Anthropic, or any of their products or services** (including ChatGPT, Claude, or Codex CLI).  
+
+All trademarks and brand names belong to their respective owners. References to “OpenAI,” “Anthropic,” or “Codex CLI” are made solely for descriptive purposes.
