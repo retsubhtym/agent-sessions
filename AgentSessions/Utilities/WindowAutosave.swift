@@ -52,8 +52,9 @@ final class MainWindowTracker {
         }
 
         guard let targetWindow else {
-            // As a last resort, ask AppKit to surface any available windows.
-            NSApp.sendAction(#selector(NSApplication.showAllWindows), to: nil, from: nil)
+            // As a last resort, unhide the app and ask every window to come forward.
+            NSApp.unhide(nil)
+            NSApp.windows.forEach { $0.makeKeyAndOrderFront(nil) }
             return
         }
 
