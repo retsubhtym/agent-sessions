@@ -15,88 +15,57 @@ struct UsageMenuBarLabel: View {
         let source = MenuBarSource(rawValue: sourceRaw) ?? .codex
         let claudeEnabled = UserDefaults.standard.bool(forKey: "ShowClaudeUsageStrip")
 
-        let text: Text = {
-            switch source {
-            case .codex:
-                return renderSource(five: codexStatus.fiveHourPercent, week: codexStatus.weekPercent, scope: scope, style: style, prefix: "CX")
-            case .claude:
-                if claudeEnabled {
-                    return renderSource(five: claudeStatus.sessionPercent, week: claudeStatus.weekAllModelsPercent, scope: scope, style: style, prefix: "CL")
-                } else {
-                    return Text("")
-                }
-            case .both:
-                let codex = renderSource(five: codexStatus.fiveHourPercent, week: codexStatus.weekPercent, scope: scope, style: style, prefix: "CX")
-                if claudeEnabled {
-                    let claude = renderSource(five: claudeStatus.sessionPercent, week: claudeStatus.weekAllModelsPercent, scope: scope, style: style, prefix: "CL")
-                    return codex + Text(" │ ") + claude
-                } else {
-                    return codex
-                }
-            }
-        }()
+        let codexMetrics = metrics(forFive: codexStatus.fiveHourPercent, week: codexStatus.weekPercent, scope: scope)
+        let claudeMetrics = metrics(forFive: claudeStatus.sessionPercent, week: claudeStatus.weekAllModelsPercent, scope: scope)
 
-        return text
-            .font(.system(size: 12, weight: .regular, design: .monospaced))
-            .padding(.horizontal, 4)
-            .fixedSize(horizontal: true, vertical: false)
-            .onAppear {
-                codexStatus.setMenuVisible(true)
-                claudeStatus.setMenuVisible(true)
-            }
-            .onDisappear {
-                codexStatus.setMenuVisible(false)
-                codexStatus.setMenuVisible(false)
-            }
-    }
+        let showCodex = source == .codex || source == .both
+        let showClaude = (source == .claude || source == .both) && claudeEnabled
+        let showDivider = showCodex && showClaude
 
-    private func renderSource(five: Int, week: Int, scope: MenuBarScope, style: MenuBarStyleKind, prefix: String?) -> Text {
-        let fiveColor: Color = .primary
-        let weekColor: Color = .primary
+        return HStack(spacing: 8) {
+            if showCodex {
+                MenuBarSourceStack(prefix: "CX", metrics: codexMetrics, style: style, showPrefix: showDivider || source != .codex)
+            }
 
-        // Create prefix with special styling applied via AttributedString
-        let prefixText: Text = {
-            if let pfx = prefix {
-                var attrStr = AttributedString(pfx.uppercased())
-                attrStr.font = .system(size: 11, weight: .semibold, design: .default)
-                attrStr.kern = -0.22 // -2% tracking at 11pt
-                return Text(attrStr) + Text(" ")
-            } else {
-                return Text("")
+            if showDivider {
+                Divider()
+                    .frame(height: 18)
+                    .padding(.horizontal, -2)
             }
-        }()
 
-        switch style {
-        case .bars:
-            let p5 = segmentBar(for: five)
-            let pw = segmentBar(for: week)
-            let left = Text("5h ").foregroundColor(fiveColor)
-                + Text(p5).foregroundColor(fiveColor)
-                + Text(" \(five)%").foregroundColor(fiveColor)
-            let right = Text("Wk ").foregroundColor(weekColor)
-                + Text(pw).foregroundColor(weekColor)
-                + Text(" \(week)%").foregroundColor(weekColor)
-            switch scope {
-            case .fiveHour: return prefixText + left
-            case .weekly: return prefixText + right
-            case .both: return prefixText + left + Text("  ") + right
+            if showClaude {
+                MenuBarSourceStack(prefix: "CL", metrics: claudeMetrics, style: style, showPrefix: true)
             }
-        case .numbers:
-            let left = Text("5h \(five)%").foregroundColor(fiveColor)
-            let right = Text("Wk \(week)%").foregroundColor(weekColor)
-            switch scope {
-            case .fiveHour: return prefixText + left
-            case .weekly: return prefixText + right
-            case .both: return prefixText + left + Text("  ") + right
-            }
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .fixedSize(horizontal: true, vertical: true)
+        .onAppear {
+            codexStatus.setMenuVisible(true)
+            claudeStatus.setMenuVisible(true)
+        }
+        .onDisappear {
+            codexStatus.setMenuVisible(false)
+            claudeStatus.setMenuVisible(false)
         }
     }
 
-    private func segmentBar(for percent: Int, segments: Int = 5) -> String {
-        let p = max(0, min(100, percent))
-        let filled = min(segments, Int(round(Double(p) / 100.0 * Double(segments))))
-        let empty = max(0, segments - filled)
-        return String(repeating: "▰", count: filled) + String(repeating: "▱", count: empty)
+    private func metrics(forFive five: Int, week: Int, scope: MenuBarScope) -> [MenuBarMetric] {
+        switch scope {
+        case .fiveHour:
+            return [MenuBarMetric(label: "5h", percent: clamp(five))]
+        case .weekly:
+            return [MenuBarMetric(label: "Wk", percent: clamp(week))]
+        case .both:
+            return [
+                MenuBarMetric(label: "5h", percent: clamp(five)),
+                MenuBarMetric(label: "Wk", percent: clamp(week))
+            ]
+        }
+    }
+
+    private func clamp(_ value: Int) -> Int {
+        max(0, min(100, value))
     }
 
     // TODO(Colorize): MenuBarExtra renders labels as template content, dropping custom colors.
@@ -104,6 +73,78 @@ struct UsageMenuBarLabel: View {
     // with per-metric colors (green 0–74%, yellow 75–89%, red 90–100%), while keeping the SwiftUI
     // menu content via NSHostingView embedded in an NSMenu. Then re-introduce a Preferences toggle.
 }
+
+
+private struct MenuBarMetric: Identifiable {
+    let label: String
+    let percent: Int
+
+    var id: String { label }
+}
+
+private struct MenuBarSourceStack: View {
+    let prefix: String
+    let metrics: [MenuBarMetric]
+    let style: MenuBarStyleKind
+    let showPrefix: Bool
+
+    var body: some View {
+        HStack(alignment: .top, spacing: style == .bars ? 6 : 4) {
+            VStack(alignment: .leading, spacing: 2) {
+                ForEach(Array(metrics.enumerated()), id: \.offset) { index, metric in
+                    line(for: metric, includePrefix: includePrefix(at: index))
+                }
+            }
+
+            if style == .bars {
+                VStack(alignment: .leading, spacing: 2) {
+                    ForEach(metrics) { metric in
+                        MenuBarMeterBar(percent: metric.percent)
+                    }
+                }
+            }
+        }
+    }
+
+    private func line(for metric: MenuBarMetric, includePrefix: Bool) -> some View {
+        Text(formattedText(for: metric, includePrefix: includePrefix))
+            .font(.system(size: 11, weight: .semibold, design: .rounded))
+            .monospacedDigit()
+    }
+
+    private func formattedText(for metric: MenuBarMetric, includePrefix: Bool) -> String {
+        let prefixPart = includePrefix ? "\(prefix.uppercased()) " : ""
+        return "\(prefixPart)\(metric.label) \(metric.percent)%"
+    }
+
+    private func includePrefix(at index: Int) -> Bool {
+        showPrefix && index == 0
+    }
+}
+
+private struct MenuBarMeterBar: View {
+    let percent: Int
+    private let segments: Int = 8
+
+    var body: some View {
+        let filled = filledSegments()
+        let baseColor = Color.primary
+
+        HStack(spacing: 1) {
+            ForEach(0..<segments, id: \.self) { index in
+                RoundedRectangle(cornerRadius: 1.5, style: .continuous)
+                    .fill(index < filled ? baseColor : baseColor.opacity(0.25))
+                    .frame(width: 3, height: 11)
+            }
+        }
+    }
+
+    private func filledSegments() -> Int {
+        let clamped = max(0, min(100, percent))
+        return min(segments, Int(round(Double(clamped) / 100.0 * Double(segments))))
+    }
+}
+
 
 struct UsageMenuBarMenuContent: View {
     @EnvironmentObject var indexer: SessionIndexer
