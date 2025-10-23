@@ -15,12 +15,39 @@ struct WindowAutosave: NSViewRepresentable {
                 win.setFrameAutosaveName(name)
                 win.isRestorable = true
             }
+            if name == "MainWindow" {
+                win.identifier = NSUserInterfaceItemIdentifier("AgentSessionsMainWindow")
+                win.isReleasedWhenClosed = false
+                MainWindowTracker.shared.register(window: win)
+            }
         }
         return v
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
         // No-op
+    }
+}
+
+@MainActor
+final class MainWindowTracker {
+    static let shared = MainWindowTracker()
+
+    private init() {}
+
+    private weak var window: NSWindow?
+
+    func register(window: NSWindow) {
+        self.window = window
+    }
+
+    func showMainWindow() {
+        NSApp.activate(ignoringOtherApps: true)
+        guard let window else { return }
+        if window.isMiniaturized {
+            window.deminiaturize(nil)
+        }
+        window.makeKeyAndOrderFront(nil)
     }
 }
 

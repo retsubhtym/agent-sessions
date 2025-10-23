@@ -127,6 +127,7 @@ final class StatusItemController: NSObject {
         menu.addItem(makeCheckboxItem(title: "Run in Background", checked: runInBackground, action: #selector(toggleRunInBackground)))
         menu.addItem(makeActionItem(title: "Refresh Limits", action: #selector(refreshLimits)))
         menu.addItem(NSMenuItem.separator())
+        menu.addItem(makeActionItem(title: "Show Agent Sessions", action: #selector(showAgentSessions)))
         menu.addItem(makeActionItem(title: "Open Preferences…", action: #selector(openPreferences)))
         menu.addItem(makeActionItem(title: "Hide Menu Bar Usage", action: #selector(hideMenuBar)))
         menu.addItem(NSMenuItem.separator())
@@ -189,6 +190,9 @@ final class StatusItemController: NSObject {
         if nextValue {
             defaults.set(true, forKey: "MenuBarEnabled")
         }
+    }
+    @objc private func showAgentSessions() {
+        MainWindowTracker.shared.showMainWindow()
     }
     @objc private func quitApp() {
         NSApp.terminate(nil)
