@@ -19,6 +19,7 @@ struct PreferencesView: View {
     @AppStorage("MenuBarEnabled") private var menuBarEnabled: Bool = false
     @AppStorage("MenuBarScope") private var menuBarScopeRaw: String = MenuBarScope.both.rawValue
     @AppStorage("MenuBarStyle") private var menuBarStyleRaw: String = MenuBarStyleKind.bars.rawValue
+    @AppStorage("RunInBackground") private var runInBackground: Bool = false
     @AppStorage("StripShowResetTime") private var stripShowResetTime: Bool = false
     @AppStorage("StripMonochromeMeters") private var stripMonochromeGlobal: Bool = false
     @AppStorage("HideZeroMessageSessions") private var hideZeroMessageSessionsPref: Bool = true
@@ -393,6 +394,19 @@ struct PreferencesView: View {
             VStack(alignment: .leading, spacing: 12) {
                 toggleRow("Show menu bar usage", isOn: $menuBarEnabled, help: "Add a menu bar item that displays usage meters")
 
+                toggleRow(
+                    "Run in background",
+                    isOn: Binding(
+                        get: { runInBackground },
+                        set: { newValue in
+                            runInBackground = newValue
+                            if newValue { menuBarEnabled = true }
+                        }
+                    ),
+                    help: "Hide the Dock icon and keep Agent Sessions available from the menu bar"
+                )
+                .disabled(!menuBarEnabled && !runInBackground)
+
                 labeledRow("Source") {
                     Picker("Source", selection: Binding(
                         get: { UserDefaults.standard.string(forKey: "MenuBarSource") ?? MenuBarSource.codex.rawValue },
@@ -435,6 +449,9 @@ struct PreferencesView: View {
                 Text("Source: Codex, Claude, or Both. Style: Bars or numbers. Scope: 5h, weekly, or both.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Text("The menu bar item must stay enabled when running in the background.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
     }
@@ -448,6 +465,19 @@ struct PreferencesView: View {
             // Status item settings (no extra section header per request)
             VStack(alignment: .leading, spacing: 12) {
                 toggleRow("Show menu bar usage", isOn: $menuBarEnabled, help: "Add a menu bar item that displays usage meters")
+
+                toggleRow(
+                    "Run in background",
+                    isOn: Binding(
+                        get: { runInBackground },
+                        set: { newValue in
+                            runInBackground = newValue
+                            if newValue { menuBarEnabled = true }
+                        }
+                    ),
+                    help: "Hide the Dock icon and keep Agent Sessions available from the menu bar"
+                )
+                .disabled(!menuBarEnabled && !runInBackground)
 
                 labeledRow("Source") {
                     Picker("Source", selection: Binding(
@@ -489,6 +519,9 @@ struct PreferencesView: View {
                 }
 
                 Text("Source: Codex, Claude, or Both. Style: Bars or numbers. Scope: 5h, weekly, or both.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("The menu bar item must stay enabled when running in the background.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -1110,6 +1143,11 @@ struct PreferencesView: View {
         resumeSettings.setLaunchMode(.terminal)
 
         geminiSettings.setBinaryOverride("")
+
+        menuBarEnabled = false
+        runInBackground = false
+        menuBarScopeRaw = MenuBarScope.both.rawValue
+        menuBarStyleRaw = MenuBarStyleKind.bars.rawValue
 
         // Reset usage strip preferences
         UserDefaults.standard.set(false, forKey: "ShowClaudeUsageStrip")

@@ -18,6 +18,7 @@ struct AgentSessionsApp: App {
     @AppStorage("MenuBarEnabled") private var menuBarEnabled: Bool = false
     @AppStorage("MenuBarScope") private var menuBarScopeRaw: String = MenuBarScope.both.rawValue
     @AppStorage("MenuBarStyle") private var menuBarStyleRaw: String = MenuBarStyleKind.bars.rawValue
+    @AppStorage("RunInBackground") private var runInBackground: Bool = false
     @AppStorage("TranscriptFontSize") private var transcriptFontSize: Double = 13
     @AppStorage("LayoutMode") private var layoutModeRaw: String = LayoutMode.vertical.rawValue
     @AppStorage("ShowUsageStrip") private var showUsageStrip: Bool = false
@@ -74,8 +75,15 @@ struct AgentSessionsApp: App {
                     updateUsageModels()
                 }
                 .onChange(of: menuBarEnabled) { _, newValue in
+                    if !newValue && runInBackground {
+                        runInBackground = false
+                    }
                     statusItemController?.setEnabled(newValue)
                     updateUsageModels()
+                }
+                .onChange(of: runInBackground) { _, newValue in
+                    if newValue { menuBarEnabled = true }
+                    applyActivationPolicy()
                 }
                 .onAppear {
                     if statusItemController == nil {
@@ -84,6 +92,7 @@ struct AgentSessionsApp: App {
                                                                      claudeStatus: claudeUsageModel)
                     }
                     statusItemController?.setEnabled(menuBarEnabled)
+                    applyActivationPolicy()
                 }
         }
         .commands {
@@ -155,6 +164,15 @@ extension AgentSessionsApp {
         // Claude usage must be explicitly allowed via "Activate Claude usage"
         let claudeExperimental = d.bool(forKey: "ShowClaudeUsageStrip")
         claudeUsageModel.setEnabled(claudeExperimental)
+    }
+
+    private func applyActivationPolicy() {
+        let desiredPolicy: NSApplication.ActivationPolicy = runInBackground ? .accessory : .regular
+        guard NSApp.activationPolicy() != desiredPolicy else { return }
+        NSApp.setActivationPolicy(desiredPolicy)
+        if desiredPolicy == .regular {
+            NSApp.activate(ignoringOtherApps: true)
+        }
     }
 
     private func setupAnalytics() {
