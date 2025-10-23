@@ -35,7 +35,7 @@ final class MainWindowTracker {
 
     private init() {}
 
-    private weak var window: NSWindow?
+    private var window: NSWindow?
 
     func register(window: NSWindow) {
         self.window = window
@@ -43,11 +43,31 @@ final class MainWindowTracker {
 
     func showMainWindow() {
         NSApp.activate(ignoringOtherApps: true)
-        guard let window else { return }
-        if window.isMiniaturized {
-            window.deminiaturize(nil)
+
+        let targetWindow: NSWindow?
+        if let window {
+            targetWindow = window
+        } else {
+            targetWindow = locateMainWindow()
         }
-        window.makeKeyAndOrderFront(nil)
+
+        guard let targetWindow else {
+            // As a last resort, ask AppKit to surface any available windows.
+            NSApp.sendAction(#selector(NSApplication.showAllWindows), to: nil, from: nil)
+            return
+        }
+
+        if targetWindow.isMiniaturized {
+            targetWindow.deminiaturize(nil)
+        }
+        targetWindow.makeKeyAndOrderFront(nil)
+
+        // Hold a strong reference in case the window was recreated.
+        window = targetWindow
+    }
+
+    private func locateMainWindow() -> NSWindow? {
+        NSApp.windows.first { $0.identifier?.rawValue == "AgentSessionsMainWindow" }
     }
 }
 
