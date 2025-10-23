@@ -245,7 +245,7 @@ struct UsageMenuBarMenuContent: View {
             Divider()
             Button("Open Preferences…") {
                 if let updater = UpdaterController.shared {
-                    PreferencesWindowController.shared.show(indexer: indexer, updaterController: updater, initialTab: .usageTracking)
+                    PreferencesWindowController.shared.show(indexer: indexer, updaterController: updater, initialTab: .general)
                 }
             }
         }
@@ -255,7 +255,7 @@ struct UsageMenuBarMenuContent: View {
 
     private func openPreferencesUsage() {
         if let updater = UpdaterController.shared {
-            PreferencesWindowController.shared.show(indexer: indexer, updaterController: updater, initialTab: .usageTracking)
+            PreferencesWindowController.shared.show(indexer: indexer, updaterController: updater, initialTab: .general)
         }
         NSApp.activate(ignoringOtherApps: true)
     }

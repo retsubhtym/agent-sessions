@@ -19,6 +19,7 @@ struct PreferencesView: View {
     @AppStorage("MenuBarEnabled") private var menuBarEnabled: Bool = false
     @AppStorage("MenuBarScope") private var menuBarScopeRaw: String = MenuBarScope.both.rawValue
     @AppStorage("MenuBarStyle") private var menuBarStyleRaw: String = MenuBarStyleKind.bars.rawValue
+    @AppStorage("RunInBackground") private var runInBackground: Bool = false
     @AppStorage("StripShowResetTime") private var stripShowResetTime: Bool = false
     @AppStorage("StripMonochromeMeters") private var stripMonochromeGlobal: Bool = false
     @AppStorage("HideZeroMessageSessions") private var hideZeroMessageSessionsPref: Bool = true
@@ -245,8 +246,28 @@ struct PreferencesView: View {
                     .foregroundStyle(.secondary)
             }
 
-            
-            
+            sectionHeader("App Behavior")
+            VStack(alignment: .leading, spacing: 12) {
+                toggleRow(
+                    "Run in background",
+                    isOn: Binding(
+                        get: { runInBackground },
+                        set: { newValue in
+                            runInBackground = newValue
+                            if newValue { menuBarEnabled = true }
+                        }
+                    ),
+                    help: "Hide the Dock icon and keep Agent Sessions available from the menu bar"
+                )
+
+                Text("Hides the Dock icon while keeping the menu bar item available.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("Menu bar usage stays enabled whenever background mode is on.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
         }
     }
 
@@ -435,6 +456,9 @@ struct PreferencesView: View {
                 Text("Source: Codex, Claude, or Both. Style: Bars or numbers. Scope: 5h, weekly, or both.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Text("Background mode is controlled from General preferences and keeps the menu bar item enabled.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
     }
@@ -489,6 +513,9 @@ struct PreferencesView: View {
                 }
 
                 Text("Source: Codex, Claude, or Both. Style: Bars or numbers. Scope: 5h, weekly, or both.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("Background mode is controlled from General preferences and keeps the menu bar item enabled.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -1110,6 +1137,11 @@ struct PreferencesView: View {
         resumeSettings.setLaunchMode(.terminal)
 
         geminiSettings.setBinaryOverride("")
+
+        menuBarEnabled = false
+        runInBackground = false
+        menuBarScopeRaw = MenuBarScope.both.rawValue
+        menuBarStyleRaw = MenuBarStyleKind.bars.rawValue
 
         // Reset usage strip preferences
         UserDefaults.standard.set(false, forKey: "ShowClaudeUsageStrip")

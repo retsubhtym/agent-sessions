@@ -87,6 +87,7 @@ final class StatusItemController: NSObject {
         let source = MenuBarSource(rawValue: d.string(forKey: "MenuBarSource") ?? MenuBarSource.codex.rawValue) ?? .codex
         let style = MenuBarStyleKind(rawValue: d.string(forKey: "MenuBarStyle") ?? MenuBarStyleKind.bars.rawValue) ?? .bars
         let scope = MenuBarScope(rawValue: d.string(forKey: "MenuBarScope") ?? MenuBarScope.both.rawValue) ?? .both
+        let runInBackground = d.bool(forKey: "RunInBackground")
 
         // Reset lines (clicking opens Preferences → Menu Bar)
         if source == .codex || source == .both {
@@ -123,10 +124,13 @@ final class StatusItemController: NSObject {
 
         menu.addItem(NSMenuItem.separator())
 
+        menu.addItem(makeCheckboxItem(title: "Run in Background", checked: runInBackground, action: #selector(toggleRunInBackground)))
         menu.addItem(makeActionItem(title: "Refresh Limits", action: #selector(refreshLimits)))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(makeActionItem(title: "Open Preferences…", action: #selector(openPreferences)))
         menu.addItem(makeActionItem(title: "Hide Menu Bar Usage", action: #selector(hideMenuBar)))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(makeActionItem(title: "Quit Agent Sessions", action: #selector(quitApp)))
 
         return menu
     }
@@ -165,7 +169,7 @@ final class StatusItemController: NSObject {
     @objc private func setScopeBoth() { UserDefaults.standard.set(MenuBarScope.both.rawValue, forKey: "MenuBarScope"); updateLength() }
     @objc private func openPreferences() {
         if let updater = UpdaterController.shared {
-            PreferencesWindowController.shared.show(indexer: indexer, updaterController: updater, initialTab: .usageTracking)
+            PreferencesWindowController.shared.show(indexer: indexer, updaterController: updater, initialTab: .general)
         }
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -177,6 +181,17 @@ final class StatusItemController: NSObject {
     @objc private func hideMenuBar() {
         UserDefaults.standard.set(false, forKey: "MenuBarEnabled")
         // The App listens to this key and hides the status item.
+    }
+    @objc private func toggleRunInBackground() {
+        let defaults = UserDefaults.standard
+        let nextValue = !defaults.bool(forKey: "RunInBackground")
+        defaults.set(nextValue, forKey: "RunInBackground")
+        if nextValue {
+            defaults.set(true, forKey: "MenuBarEnabled")
+        }
+    }
+    @objc private func quitApp() {
+        NSApp.terminate(nil)
     }
     // Lightweight replica of reset line
     private func resetLine(label: String, percent: Int, reset: String) -> String {
